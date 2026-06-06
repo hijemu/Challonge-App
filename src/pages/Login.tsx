@@ -1,14 +1,13 @@
 import {
   IonButton,
+  IonCard,
+  IonCardContent,
   IonContent,
-  IonHeader,
   IonInput,
   IonItem,
   IonLabel,
   IonPage,
   IonText,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/react';
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -39,42 +38,56 @@ const Login: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{mode === 'login' ? 'Login' : 'Create Account'}</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        {mode === 'register' && (
-          <IonItem>
-            <IonLabel position="stacked">Name</IonLabel>
-            <IonInput value={name} onIonInput={(e) => setName(e.detail.value || '')} />
-          </IonItem>
-        )}
+      <IonContent fullscreen>
+        <div className="app-page" style={{ minHeight: '100vh', display: 'grid', alignItems: 'center' }}>
+          <IonCard className="hero-card">
+            <IonCardContent>
+              <span className="hero-kicker">Mga Nigga</span>
+              <h1 className="hero-title">Central Manila x Ilocos Elites</h1>
+              <p className="hero-subtitle">
+                Connect your own Challonge account, manage tournaments, and report Beyblade X scores from mobile.
+              </p>
+            </IonCardContent>
+          </IonCard>
 
-        <IonItem>
-          <IonLabel position="stacked">Email</IonLabel>
-          <IonInput type="email" value={email} onIonInput={(e) => setEmail(e.detail.value || '')} />
-        </IonItem>
+          <IonCard className="soft-card">
+            <IonCardContent>
+              <h2 style={{ marginBottom: 6 }}>{mode === 'login' ? 'Welcome back' : 'Create staff account'}</h2>
+              <p>{mode === 'login' ? 'Login to continue managing brackets.' : 'First account becomes Super Admin.'}</p>
 
-        <IonItem>
-          <IonLabel position="stacked">Password</IonLabel>
-          <IonInput type="password" value={password} onIonInput={(e) => setPassword(e.detail.value || '')} />
-        </IonItem>
+              {mode === 'register' && (
+                <IonItem>
+                  <IonLabel position="stacked">Name</IonLabel>
+                  <IonInput value={name} onIonInput={(e) => setName(e.detail.value || '')} />
+                </IonItem>
+              )}
 
-        {error && <IonText color="danger"><p>{error}</p></IonText>}
+              <IonItem>
+                <IonLabel position="stacked">Email</IonLabel>
+                <IonInput value={email} onIonInput={(e) => setEmail(e.detail.value || '')} type="email" />
+              </IonItem>
 
-        <IonButton expand="block" onClick={submit}>
-          {mode === 'login' ? 'Login' : 'Register'}
-        </IonButton>
+              <IonItem>
+                <IonLabel position="stacked">Password</IonLabel>
+                <IonInput value={password} onIonInput={(e) => setPassword(e.detail.value || '')} type="password" />
+              </IonItem>
 
-        <IonButton fill="clear" expand="block" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
-          {mode === 'login' ? 'Create new account' : 'Already have an account? Login'}
-        </IonButton>
+              {error && <IonText color="danger"><p>{error}</p></IonText>}
 
-        <IonText color="medium">
-          <p>First registered account becomes Super Admin. After that, new accounts are view-only until assigned staff permissions.</p>
-        </IonText>
+              <IonButton expand="block" onClick={submit}>
+                {mode === 'login' ? 'Login' : 'Create account'}
+              </IonButton>
+
+              <IonButton
+                expand="block"
+                fill="clear"
+                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+              >
+                {mode === 'login' ? 'Create new account' : 'Already have an account? Login'}
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
+        </div>
       </IonContent>
     </IonPage>
   );

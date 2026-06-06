@@ -1,152 +1,98 @@
-import {
-  IonBackButton,
-  IonBadge,
-  IonButtons,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonPage,
-  IonSearchbar,
-  IonSegment,
-  IonSegmentButton,
-  IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import MatchCard from '../components/MatchCard';
+import { IonContent, IonPage, IonText } from '@ionic/react';
+import { useEffect, useMemo, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { getMatches, getParticipants, getStandings, getTournament } from '../api/challonge';
+import MatchCard from '../components/MatchCard';
+import '../theme/bbx.css';
+
+const unwrapTournament = (data: any) => data?.tournament || data?.data?.tournament || data?.data || data || {};
+const listFrom = (data: any, key: string) => Array.isArray(data) ? data : data?.[key] || data?.data || [];
 
 const TournamentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const history = useHistory();
   const [tournament, setTournament] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [participants, setParticipants] = useState<any[]>([]);
   const [standings, setStandings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [player1Search, setPlayer1Search] = useState('');
-  const [player2Search, setPlayer2Search] = useState('');
-  const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
+  const [tab, setTab] = useState<'matches' | 'players' | 'standings'>('matches');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    loadData();
+    const load = async () => {
+      try {
+        const [t, m, p, s] = await Promise.all([
+          getTournament(id),
+          getMatches(id),
+          getParticipants(id),
+          getStandings(id).catch(() => []),
+        ]);
+        setTournament(unwrapTournament(t));
+        setMatches(listFrom(m, 'matches'));
+        setParticipants(listFrom(p, 'participants'));
+        setStandings(listFrom(s, 'standings'));
+      } catch (err: any) {
+        setMessage(err.response?.data?.error || 'Could not load tournament.');
+      }
+    };
+    load();
   }, [id]);
 
-  const loadData = async () => {
-    try {
-      const [tournamentResponse, matchesResponse, participantsResponse, standingsResponse] = await Promise.all([
-        getTournament(id),
-        getMatches(id),
-        getParticipants(id),
-        getStandings(id),
-      ]);
-
-      setTournament(tournamentResponse.tournament);
-      setMatches(matchesResponse);
-      setParticipants(participantsResponse);
-      setStandings(standingsResponse);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getParticipantName = (participantId: number) => {
-    const participant = participants.find((p: any) => p.participant.id === participantId);
-    return participant ? participant.participant.name : 'TBD';
-  };
-
-  const filteredMatches = matches.filter((item: any) => {
-    const match = item.match;
-    const player1 = match.player1_id ? getParticipantName(match.player1_id) : '';
-    const player2 = match.player2_id ? getParticipantName(match.player2_id) : '';
-    const names = `${player1} ${player2}`.toLowerCase();
-    return names.includes(player1Search.toLowerCase()) && names.includes(player2Search.toLowerCase());
-  });
+  const title = tournament?.name || tournament?.title || 'Tournament';
+  const state = tournament?.state || 'ready';
+  const type = tournament?.tournament_type || tournament?.type || 'Beyblade X';
+  const currentList = useMemo(() => ({ matches, players: participants, standings })[tab], [tab, matches, participants, standings]);
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton defaultHref="/tournaments" />
-          </IonButtons>
-          <IonTitle>Tournament</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <IonContent fullscreen>
+        <main className="bbx-page">
+          <div className="bbx-back-row">
+            <button className="bbx-back-button" onClick={() => history.push('/tournaments')}>← Tournaments</button>
+          </div>
 
-      <IonContent className="ion-padding">
-        {loading && <IonSpinner />}
+          <section className="bbx-hero">
+            <div className="bbx-hero-main">
+              <span className="bbx-kicker">Battle room</span>
+              <h1 className="bbx-title" style={{ fontSize: 36 }}>{title}</h1>
+              <p className="bbx-subtitle">{String(type).replaceAll('_', ' ')} · {String(state).replaceAll('_', ' ')}</p>
+            </div>
+            <div className="bbx-stat-grid">
+              <div className="bbx-stat"><strong>{matches.length}</strong><span>Matches</span></div>
+              <div className="bbx-stat"><strong>{participants.length}</strong><span>Players</span></div>
+              <div className="bbx-stat"><strong>{standings.length}</strong><span>Ranks</span></div>
+            </div>
+          </section>
 
-        {!loading && tournament && (
-          <>
-            <IonCard>
-              <IonCardHeader>
-                <IonCardTitle>{tournament.name}</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <p>{tournament.game_name || 'Tournament'}</p>
-                <IonBadge>{tournament.state}</IonBadge>
-                <p>Players: {tournament.participants_count}</p>
-                <p>Matches: {matches.length}</p>
-                <p>Type: {tournament.tournament_type}</p>
-              </IonCardContent>
-            </IonCard>
+          {message && <IonText color="medium"><p>{message}</p></IonText>}
 
-            <IonSegment value={activeTab} onIonChange={(e) => setActiveTab(e.detail.value as any)}>
-              <IonSegmentButton value="matches">Matches</IonSegmentButton>
-              <IonSegmentButton value="standings">Standings</IonSegmentButton>
-            </IonSegment>
+          <div className="bbx-tabbar" style={{ position: 'static', width: 'auto', transform: 'none', margin: '0 0 18px' }}>
+            <button className={tab === 'matches' ? 'active' : ''} onClick={() => setTab('matches')}>⚔️<br />Matches</button>
+            <button className={tab === 'players' ? 'active' : ''} onClick={() => setTab('players')}>👥<br />Players</button>
+            <button className={tab === 'standings' ? 'active' : ''} onClick={() => setTab('standings')}>📊<br />Ranks</button>
+          </div>
 
-            {activeTab === 'matches' && (
-              <>
-                <IonSearchbar placeholder="Search player 1 / name" value={player1Search} onIonInput={(e) => setPlayer1Search(e.detail.value || '')} />
-                <IonSearchbar placeholder="Search player 2 / name" value={player2Search} onIonInput={(e) => setPlayer2Search(e.detail.value || '')} />
+          <div className="bbx-card-list">
+            {tab === 'matches' && matches.map((match, index) => <MatchCard key={match?.match?.id || match?.id || index} match={match} />)}
 
-                {filteredMatches.length === 0 && <IonText>No matches available.</IonText>}
+            {tab !== 'matches' && currentList.map((item: any, index: number) => {
+              const data = item?.participant || item?.standing || item;
+              return (
+                <div key={data?.id || index} className="bbx-tournament-card">
+                  <div>
+                    <h3 className="bbx-tournament-name">{data?.name || data?.display_name || data?.username || `Entry ${index + 1}`}</h3>
+                    <div className="bbx-tournament-meta">
+                      <span className="bbx-chip">#{data?.rank || data?.seed || index + 1}</span>
+                      {data?.final_rank && <span className="bbx-chip">Final rank {data.final_rank}</span>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
 
-                {filteredMatches.map((item: any) => {
-                  const match = item.match;
-                  const player1 = match.player1_id ? getParticipantName(match.player1_id) : 'TBD';
-                  const player2 = match.player2_id ? getParticipantName(match.player2_id) : 'TBD';
-
-                  return (
-                    <MatchCard
-                      key={match.id}
-                      match={match}
-                      player1={player1}
-                      player2={player2}
-                      onUpdated={loadData}
-                    />
-                  );
-                })}
-              </>
-            )}
-
-            {activeTab === 'standings' && (
-              <IonList>
-                {standings.map((player: any, index: number) => (
-                  <IonItem key={player.id}>
-                    <IonLabel>
-                      <h2>#{index + 1} {player.name}</h2>
-                      <p>Record: {player.wins}W - {player.losses}L</p>
-                      <p>Points Diff: {player.pointsScored - player.pointsAgainst} | Points Scored: {player.pointsScored}</p>
-                    </IonLabel>
-                  </IonItem>
-                ))}
-              </IonList>
-            )}
-          </>
-        )}
+            {!currentList.length && <div className="bbx-empty">Nothing here yet.</div>}
+          </div>
+        </main>
       </IonContent>
     </IonPage>
   );

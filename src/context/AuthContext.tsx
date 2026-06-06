@@ -2,10 +2,10 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../api/challonge';
 
 type User = {
-  id: number;
+  id: number | string;
   name: string;
   email: string;
-  role: 'super_admin' | 'organizer' | 'judge' | 'player';
+  role: 'super_admin' | 'organizer' | 'judge' | 'viewer' | 'player';
 };
 
 type AuthContextValue = {
