@@ -1,84 +1,58 @@
 import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
+  IonBackButton,
+  IonBadge,
+  IonButtons,
   IonCard,
+  IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonCardContent,
-  IonList,
+  IonContent,
+  IonHeader,
   IonItem,
   IonLabel,
-  IonText,
-  IonBackButton,
-  IonButtons,
-  IonChip,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonBadge,
-  IonSpinner,
-  IonButton,
-  IonInput,
+  IonList,
+  IonPage,
+  IonSearchbar,
   IonSegment,
   IonSegmentButton,
-  IonSearchbar,
-} from "@ionic/react";
-
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-
-import MatchCard from "../components/MatchCard";
+  IonSpinner,
+  IonText,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import MatchCard from '../components/MatchCard';
+import { getMatches, getParticipants, getStandings, getTournament } from '../api/challonge';
 
 const TournamentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-
   const [tournament, setTournament] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [player1Search, setPlayer1Search] = useState("");
-  const [player2Search, setPlayer2Search] = useState("");
-
-  const [activeTab, setActiveTab] = useState<"matches" | "standings">(
-    "matches",
-  );
-
+  const [participants, setParticipants] = useState<any[]>([]);
   const [standings, setStandings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [player1Search, setPlayer1Search] = useState('');
+  const [player2Search, setPlayer2Search] = useState('');
+  const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
 
   useEffect(() => {
     loadData();
-  }, []);
-
-  const [participants, setParticipants] = useState<any[]>([]);
+  }, [id]);
 
   const loadData = async () => {
     try {
-      const tournamentResponse = await axios.get(
-        `http://localhost:3001/tournaments/${id}`,
-      );
+      const [tournamentResponse, matchesResponse, participantsResponse, standingsResponse] = await Promise.all([
+        getTournament(id),
+        getMatches(id),
+        getParticipants(id),
+        getStandings(id),
+      ]);
 
-      const matchesResponse = await axios.get(
-        `http://localhost:3001/tournaments/${id}/matches`,
-      );
-
-      const participantsResponse = await axios.get(
-        `http://localhost:3001/tournaments/${id}/participants`,
-      );
-
-      const standingsResponse = await axios.get(
-        `http://localhost:3001/tournaments/${id}/standings`,
-      );
-      setStandings(standingsResponse.data);
-
-      setTournament(tournamentResponse.data.tournament);
-
-      setMatches(matchesResponse.data);
-
-      setParticipants(participantsResponse.data);
+      setTournament(tournamentResponse.tournament);
+      setMatches(matchesResponse);
+      setParticipants(participantsResponse);
+      setStandings(standingsResponse);
     } catch (err) {
       console.error(err);
     } finally {
@@ -86,54 +60,17 @@ const TournamentDetail: React.FC = () => {
     }
   };
 
-  const getParticipantName = (id: number) => {
-    const participant = participants.find((p: any) => p.participant.id === id);
-    return participant ? participant.participant.name : "TBD";
-  };
-
-  const submitScore = async (
-    matchId: number,
-    scores: string,
-    winnerId: number,
-  ) => {
-    try {
-      await axios.put(`http://localhost:3001/matches/${matchId}`, {
-        scores_csv: scores,
-        winner_id: winnerId,
-      });
-      alert("Score updated");
-      loadData();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update score");
-    }
+  const getParticipantName = (participantId: number) => {
+    const participant = participants.find((p: any) => p.participant.id === participantId);
+    return participant ? participant.participant.name : 'TBD';
   };
 
   const filteredMatches = matches.filter((item: any) => {
     const match = item.match;
-
-    const player1 = match.player1_id
-      ? getParticipantName(match.player1_id)
-      : "";
-
-    const player2 = match.player2_id
-      ? getParticipantName(match.player2_id)
-      : "";
-
-    const p1 = player1.toLowerCase();
-    const p2 = player2.toLowerCase();
-
-    const search1 = player1Search.toLowerCase();
-
-    const search2 = player2Search.toLowerCase();
-
-    const player1Match =
-      !search1 || p1.includes(search1) || p2.includes(search1);
-
-    const player2Match =
-      !search2 || p1.includes(search2) || p2.includes(search2);
-
-    return player1Match && player2Match;
+    const player1 = match.player1_id ? getParticipantName(match.player1_id) : '';
+    const player2 = match.player2_id ? getParticipantName(match.player2_id) : '';
+    const names = `${player1} ${player2}`.toLowerCase();
+    return names.includes(player1Search.toLowerCase()) && names.includes(player2Search.toLowerCase());
   });
 
   return (
@@ -143,172 +80,45 @@ const TournamentDetail: React.FC = () => {
           <IonButtons slot="start">
             <IonBackButton defaultHref="/tournaments" />
           </IonButtons>
-
           <IonTitle>Tournament</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent fullscreen className="ion-padding">
-        {loading && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "60vh",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
-            <IonSpinner name="crescent" />
-            <IonText>Loading tournament...</IonText>
-          </div>
-        )}
+      <IonContent className="ion-padding">
+        {loading && <IonSpinner />}
 
         {!loading && tournament && (
           <>
-            <IonCard
-              style={{
-                borderRadius: "20px",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  background: "linear-gradient(135deg, #3880ff, #5260ff)",
-                  padding: "24px",
-                  color: "white",
-                }}
-              >
-                <h1
-                  style={{
-                    margin: 0,
-                    fontSize: "28px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {tournament.name}
-                </h1>
-
-                <p
-                  style={{
-                    marginTop: "8px",
-                    opacity: 0.9,
-                  }}
-                >
-                  {tournament.game_name || "Tournament"}
-                </p>
-
-                <IonChip color="light">{tournament.state}</IonChip>
-              </div>
-
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>{tournament.name}</IonCardTitle>
+              </IonCardHeader>
               <IonCardContent>
-                <IonGrid>
-                  <IonRow>
-                    <IonCol size="6">
-                      <div
-                        style={{
-                          textAlign: "center",
-                          padding: "16px",
-                        }}
-                      >
-                        <h2 style={{ margin: 0 }}>
-                          {tournament.participants_count}
-                        </h2>
-
-                        <p style={{ opacity: 0.7 }}>Players</p>
-                      </div>
-                    </IonCol>
-
-                    <IonCol size="6">
-                      <div
-                        style={{
-                          textAlign: "center",
-                          padding: "16px",
-                        }}
-                      >
-                        <h2 style={{ margin: 0 }}>{matches.length}</h2>
-
-                        <p style={{ opacity: 0.7 }}>Matches</p>
-                      </div>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-
-                <div style={{ marginTop: "16px" }}>
-                  <p>
-                    <strong>Type:</strong> {tournament.tournament_type}
-                  </p>
-
-                  <p>
-                    <strong>URL:</strong> {tournament.full_challonge_url}
-                  </p>
-
-                  <p>
-                    <strong>Created:</strong>{" "}
-                    {new Date(tournament.created_at).toLocaleString()}
-                  </p>
-                </div>
+                <p>{tournament.game_name || 'Tournament'}</p>
+                <IonBadge>{tournament.state}</IonBadge>
+                <p>Players: {tournament.participants_count}</p>
+                <p>Matches: {matches.length}</p>
+                <p>Type: {tournament.tournament_type}</p>
               </IonCardContent>
             </IonCard>
-            <div
-              style={{
-                marginTop: "24px",
-                marginBottom: "12px",
-              }}
-            >
-              <h2>Matches</h2>
-            </div>
-            <IonSegment
-              value={activeTab}
-              onIonChange={(e) => setActiveTab(e.detail.value as any)}
-              style={{ marginBottom: "20px" }}
-            >
-              {" "}
-              <IonSegmentButton value="matches">
-                {" "}
-                <IonLabel> Matches </IonLabel>{" "}
-              </IonSegmentButton>{" "}
-              <IonSegmentButton value="standings">
-                {" "}
-                <IonLabel> Standings </IonLabel>{" "}
-              </IonSegmentButton>{" "}
+
+            <IonSegment value={activeTab} onIonChange={(e) => setActiveTab(e.detail.value as any)}>
+              <IonSegmentButton value="matches">Matches</IonSegmentButton>
+              <IonSegmentButton value="standings">Standings</IonSegmentButton>
             </IonSegment>
 
-            {activeTab === "matches" && (
-              <IonList>
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    display: "flex",
-                  }}
-                >
-                  <IonSearchbar
-                    placeholder="Search Player 1"
-                    value={player1Search}
-                    onIonInput={(e) => setPlayer1Search(e.detail.value || "")}
-                  />
+            {activeTab === 'matches' && (
+              <>
+                <IonSearchbar placeholder="Search player 1 / name" value={player1Search} onIonInput={(e) => setPlayer1Search(e.detail.value || '')} />
+                <IonSearchbar placeholder="Search player 2 / name" value={player2Search} onIonInput={(e) => setPlayer2Search(e.detail.value || '')} />
 
-                  <IonSearchbar
-                    placeholder="Search Player 2"
-                    value={player2Search}
-                    onIonInput={(e) => setPlayer2Search(e.detail.value || "")}
-                  />
-                </div>
-                {matches.length === 0 && (
-                  <IonItem>
-                    <IonLabel>No matches available.</IonLabel>
-                  </IonItem>
-                )}
+                {filteredMatches.length === 0 && <IonText>No matches available.</IonText>}
 
                 {filteredMatches.map((item: any) => {
                   const match = item.match;
-                  const player1 = match.player1_id
-                    ? getParticipantName(match.player1_id)
-                    : "TBD";
-                  const player2 = match.player2_id
-                    ? getParticipantName(match.player2_id)
-                    : "TBD";
+                  const player1 = match.player1_id ? getParticipantName(match.player1_id) : 'TBD';
+                  const player2 = match.player2_id ? getParticipantName(match.player2_id) : 'TBD';
+
                   return (
                     <MatchCard
                       key={match.id}
@@ -319,24 +129,17 @@ const TournamentDetail: React.FC = () => {
                     />
                   );
                 })}
-              </IonList>
+              </>
             )}
-            {activeTab === "standings" && (
+
+            {activeTab === 'standings' && (
               <IonList>
                 {standings.map((player: any, index: number) => (
                   <IonItem key={player.id}>
                     <IonLabel>
-                      <h2>
-                        #{index + 1} {player.name}
-                      </h2>
-                      <p>
-                        Record: {player.wins}W -{player.losses}L
-                      </p>
-                      <p>
-                        Points Diff: {player.pointsScored - player.pointsAgainst}
-                        {" | "}
-                        Points Scored: {player.pointsScored}
-                      </p>
+                      <h2>#{index + 1} {player.name}</h2>
+                      <p>Record: {player.wins}W - {player.losses}L</p>
+                      <p>Points Diff: {player.pointsScored - player.pointsAgainst} | Points Scored: {player.pointsScored}</p>
                     </IonLabel>
                   </IonItem>
                 ))}
