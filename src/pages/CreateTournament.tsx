@@ -24,11 +24,11 @@ const slugify = (value: string) =>
 const unwrapTournament = (data: any) =>
   data?.tournament || data?.data?.tournament || data?.data || data || {};
 
-  const tieBreakOptions = [
-    { value: "points difference", label: "Points Diff" },
-    { value: "points scored", label: "Points Scored" },
-    { value: "median buchholz", label: "Median Buchholz" },
-  ];
+const tieBreakOptions = [
+  { value: "points difference", label: "Points Diff" },
+  { value: "points scored", label: "Points Scored" },
+  { value: "median buchholz", label: "Median Buchholz" },
+];
 
 const CreateTournament: React.FC = () => {
   const history = useHistory();
@@ -36,6 +36,9 @@ const CreateTournament: React.FC = () => {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [format, setFormat] = useState("swiss");
+  const [finalsCut, setFinalsCut] = useState(8);
+  const [swissRounds, setSwissRounds] = useState(5);
+  const [roundRobinIterations, setRoundRobinIterations] = useState(1);
   const [gameName, setGameName] = useState("Beyblade X");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -47,8 +50,17 @@ const CreateTournament: React.FC = () => {
 
   const finalUrl = useMemo(() => url, [url]);
 
-  const supportsTieBreaks =
-    format === "swiss" || format === "round robin";
+  const isSwissFormat =
+    format === "swiss" || format === "swiss_single_elim";
+
+  const isRoundRobinFormat =
+    format === "round robin" || format === "round_robin_single_elim";
+
+  const isTwoStage =
+    format === "swiss_single_elim" ||
+    format === "round_robin_single_elim";
+
+  const supportsTieBreaks = isSwissFormat || isRoundRobinFormat;
 
   const applyBbxPreset = () => {
     setTieBreak1("points difference");
@@ -83,6 +95,18 @@ const CreateTournament: React.FC = () => {
       if (supportsTieBreaks) {
         payload.ranking = "match wins";
         payload.tie_breaks = [tieBreak1, tieBreak2, tieBreak3];
+      }
+
+      if (isSwissFormat) {
+        payload.swiss_rounds = swissRounds;
+      }
+
+      if (isRoundRobinFormat) {
+        payload.round_robin_iterations = roundRobinIterations;
+      }
+
+      if (isTwoStage) {
+        payload.finals_cut = finalsCut;
       }
 
       const data = await createTournament(payload);
@@ -152,7 +176,9 @@ const CreateTournament: React.FC = () => {
               <IonInput
                 value={finalUrl}
                 placeholder="saturday-bbx-cup"
-                onIonInput={(e) => setUrl(slugify(String(e.detail.value || "")))}
+                onIonInput={(e) =>
+                  setUrl(slugify(String(e.detail.value || "")))
+                }
               />
             </IonItem>
 
@@ -163,18 +189,79 @@ const CreateTournament: React.FC = () => {
                 interface="popover"
                 onIonChange={(e) => setFormat(e.detail.value)}
               >
-                <IonSelectOption value="swiss">Swiss</IonSelectOption>
+                <IonSelectOption value="swiss">Swiss Only</IonSelectOption>
+                <IonSelectOption value="round robin">
+                  Round Robin Only
+                </IonSelectOption>
                 <IonSelectOption value="single elimination">
-                  Single Elimination
+                  Single Elimination Only
                 </IonSelectOption>
                 <IonSelectOption value="double elimination">
-                  Double Elimination
+                  Double Elimination Only
                 </IonSelectOption>
-                <IonSelectOption value="round robin">
-                  Round Robin
+                <IonSelectOption value="swiss_single_elim">
+                  Swiss → Single Elim
+                </IonSelectOption>
+                <IonSelectOption value="round_robin_single_elim">
+                  Round Robin → Single Elim
                 </IonSelectOption>
               </IonSelect>
             </IonItem>
+
+            {isSwissFormat && (
+              <IonItem className="bbx-input" lines="none">
+                <IonLabel position="stacked">Swiss Rounds</IonLabel>
+                <IonSelect
+                  value={swissRounds}
+                  interface="popover"
+                  onIonChange={(e) => setSwissRounds(Number(e.detail.value))}
+                >
+                  <IonSelectOption value={3}>3 Rounds</IonSelectOption>
+                  <IonSelectOption value={4}>4 Rounds</IonSelectOption>
+                  <IonSelectOption value={5}>5 Rounds</IonSelectOption>
+                  <IonSelectOption value={6}>6 Rounds</IonSelectOption>
+                  <IonSelectOption value={7}>7 Rounds</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+            )}
+
+            {isRoundRobinFormat && (
+              <IonItem className="bbx-input" lines="none">
+                <IonLabel position="stacked">Round Robin Cycles</IonLabel>
+                <IonSelect
+                  value={roundRobinIterations}
+                  interface="popover"
+                  onIonChange={(e) =>
+                    setRoundRobinIterations(Number(e.detail.value))
+                  }
+                >
+                  <IonSelectOption value={1}>
+                    Single Round Robin
+                  </IonSelectOption>
+                  <IonSelectOption value={2}>
+                    Double Round Robin
+                  </IonSelectOption>
+                  <IonSelectOption value={3}>
+                    Triple Round Robin
+                  </IonSelectOption>
+                </IonSelect>
+              </IonItem>
+            )}
+
+            {isTwoStage && (
+              <IonItem className="bbx-input" lines="none">
+                <IonLabel position="stacked">Finals Cut</IonLabel>
+                <IonSelect
+                  value={finalsCut}
+                  interface="popover"
+                  onIonChange={(e) => setFinalsCut(Number(e.detail.value))}
+                >
+                  <IonSelectOption value={4}>Top 4</IonSelectOption>
+                  <IonSelectOption value={8}>Top 8</IonSelectOption>
+                  <IonSelectOption value={16}>Top 16</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+            )}
 
             <IonItem className="bbx-input" lines="none">
               <IonLabel position="stacked">Game</IonLabel>
@@ -189,9 +276,7 @@ const CreateTournament: React.FC = () => {
               <IonTextarea
                 value={description}
                 placeholder="Optional notes..."
-                onIonInput={(e) =>
-                  setDescription(String(e.detail.value || ""))
-                }
+                onIonInput={(e) => setDescription(String(e.detail.value || ""))}
               />
             </IonItem>
 
