@@ -2,42 +2,55 @@
   color-scheme: light;
   --ion-background-color: #f7f8fc;
   --ion-text-color: #121629;
-  --ion-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ion-font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bbx-bg: #f7f8fc;
-  --bbx-card: rgba(255,255,255,.92);
+  --bbx-card: rgba(255, 255, 255, 0.92);
   --bbx-ink: #121629;
   --bbx-muted: #7a8195;
-  --bbx-line: rgba(18,22,41,.08);
+  --bbx-line: rgba(18, 22, 41, 0.08);
   --bbx-primary: #6c5cff;
   --bbx-primary-2: #8b5cf6;
   --bbx-accent: #00d4ff;
   --bbx-good: #16a34a;
   --bbx-warn: #f59e0b;
   --bbx-danger: #ef4444;
-  --bbx-shadow: 0 18px 45px rgba(22, 26, 52, .10);
+  --bbx-shadow: 0 18px 45px rgba(22, 26, 52, 0.1);
   --bbx-radius-xl: 30px;
   --bbx-radius-lg: 24px;
   --bbx-radius-md: 18px;
 }
 
-html, body, ion-app, ion-content {
+html,
+body,
+ion-app,
+ion-content {
   background: var(--bbx-bg) !important;
 }
 
-ion-header, ion-toolbar {
+ion-header,
+ion-toolbar {
   display: none !important;
 }
 
 ion-content::part(background) {
-  background:
-    radial-gradient(circle at 8% 0%, rgba(108,92,255,.14), transparent 26rem),
-    radial-gradient(circle at 92% 5%, rgba(0,212,255,.18), transparent 26rem),
+  background: radial-gradient(
+      circle at 8% 0%,
+      rgba(108, 92, 255, 0.14),
+      transparent 26rem
+    ),
+    radial-gradient(
+      circle at 92% 5%,
+      rgba(0, 212, 255, 0.18),
+      transparent 26rem
+    ),
     linear-gradient(180deg, #fbfcff 0%, #f3f5fb 100%) !important;
 }
 
 .bbx-page {
   min-height: 100%;
-  padding: max(20px, env(safe-area-inset-top)) 18px calc(110px + env(safe-area-inset-bottom));
+  padding: max(20px, env(safe-area-inset-top)) 18px
+    calc(110px + env(safe-area-inset-bottom));
   color: var(--bbx-ink);
 }
 
@@ -56,19 +69,19 @@ ion-content::part(background) {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(108,92,255,.11);
+  background: rgba(108, 92, 255, 0.11);
   color: var(--bbx-primary);
   font-weight: 900;
   font-size: 11px;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .bbx-title {
   margin: 10px 0 0;
   font-size: clamp(30px, 8vw, 44px);
-  line-height: .95;
-  letter-spacing: -.06em;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
   font-weight: 950;
 }
 
@@ -89,17 +102,20 @@ ion-content::part(background) {
   font-weight: 950;
   color: #fff;
   background: linear-gradient(135deg, var(--bbx-primary), var(--bbx-accent));
-  box-shadow: 0 14px 32px rgba(108,92,255,.24);
+  box-shadow: 0 14px 32px rgba(108, 92, 255, 0.24);
 }
 
 .bbx-hero {
   position: relative;
   overflow: hidden;
   border-radius: var(--bbx-radius-xl);
-  background:
-    radial-gradient(circle at 88% 10%, rgba(0,212,255,.27), transparent 11rem),
+  background: radial-gradient(
+      circle at 88% 10%,
+      rgba(0, 212, 255, 0.27),
+      transparent 11rem
+    ),
     linear-gradient(135deg, #ffffff 0%, #eef2ff 72%, #e6fbff 100%);
-  border: 1px solid rgba(108,92,255,.12);
+  border: 1px solid rgba(108, 92, 255, 0.12);
   box-shadow: var(--bbx-shadow);
   padding: 22px;
   margin: 8px 0 20px;
@@ -114,7 +130,11 @@ ion-content::part(background) {
   height: 150px;
   border-radius: 44px;
   transform: rotate(19deg);
-  background: linear-gradient(135deg, rgba(108,92,255,.15), rgba(0,212,255,.18));
+  background: linear-gradient(
+    135deg,
+    rgba(108, 92, 255, 0.15),
+    rgba(0, 212, 255, 0.18)
+  );
 }
 
 .bbx-hero-main {
@@ -133,8 +153,8 @@ ion-content::part(background) {
 
 .bbx-stat {
   border-radius: 20px;
-  background: rgba(255,255,255,.72);
-  border: 1px solid rgba(255,255,255,.85);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   padding: 12px 10px;
   backdrop-filter: blur(12px);
 }
@@ -143,7 +163,7 @@ ion-content::part(background) {
   display: block;
   font-size: 18px;
   font-weight: 950;
-  letter-spacing: -.04em;
+  letter-spacing: -0.04em;
 }
 
 .bbx-stat span {
@@ -166,7 +186,7 @@ ion-content::part(background) {
   margin: 0;
   font-size: 20px;
   font-weight: 950;
-  letter-spacing: -.04em;
+  letter-spacing: -0.04em;
 }
 
 .bbx-section-title span {
@@ -187,8 +207,8 @@ ion-content::part(background) {
   border: 0;
   border-radius: var(--bbx-radius-lg);
   background: var(--bbx-card);
-  box-shadow: 0 12px 30px rgba(22, 26, 52, .065);
-  border: 1px solid rgba(255,255,255,.75);
+  box-shadow: 0 12px 30px rgba(22, 26, 52, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.75);
   color: var(--bbx-ink);
 }
 
@@ -208,17 +228,21 @@ ion-content::part(background) {
   width: 5px;
   background: linear-gradient(180deg, var(--bbx-primary), var(--bbx-accent));
   opacity: 0;
-  transition: opacity .2s ease;
+  transition: opacity 0.2s ease;
 }
 
-.bbx-tournament-card:active { transform: scale(.985); }
-.bbx-tournament-card:hover::before { opacity: 1; }
+.bbx-tournament-card:active {
+  transform: scale(0.985);
+}
+.bbx-tournament-card:hover::before {
+  opacity: 1;
+}
 
 .bbx-tournament-name {
   margin: 0;
   font-size: 17px;
   font-weight: 900;
-  letter-spacing: -.025em;
+  letter-spacing: -0.025em;
 }
 
 .bbx-tournament-meta {
@@ -245,7 +269,7 @@ ion-content::part(background) {
   height: 7px;
   border-radius: 999px;
   background: var(--bbx-good);
-  box-shadow: 0 0 0 4px rgba(22,163,74,.13);
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.13);
 }
 
 .bbx-chevron {
@@ -256,7 +280,7 @@ ion-content::part(background) {
   display: grid;
   place-items: center;
   color: var(--bbx-primary);
-  background: rgba(108,92,255,.09);
+  background: rgba(108, 92, 255, 0.09);
   font-weight: 950;
 }
 
@@ -273,8 +297,8 @@ ion-content::part(background) {
   min-height: 52px;
   padding: 0 16px;
   font-weight: 950;
-  letter-spacing: -.02em;
-  box-shadow: 0 14px 28px rgba(108,92,255,.20);
+  letter-spacing: -0.02em;
+  box-shadow: 0 14px 28px rgba(108, 92, 255, 0.2);
 }
 
 .bbx-button.primary {
@@ -284,23 +308,23 @@ ion-content::part(background) {
 
 .bbx-button.ghost {
   color: var(--bbx-primary);
-  background: rgba(108,92,255,.10);
+  background: rgba(108, 92, 255, 0.1);
   box-shadow: none;
 }
 
 .bbx-button.danger {
   color: var(--bbx-danger);
-  background: rgba(239,68,68,.10);
+  background: rgba(239, 68, 68, 0.1);
   box-shadow: none;
 }
 
 .bbx-empty {
-  border: 1px dashed rgba(108,92,255,.26);
+  border: 1px dashed rgba(108, 92, 255, 0.26);
   border-radius: var(--bbx-radius-lg);
   padding: 26px 18px;
   text-align: center;
   color: var(--bbx-muted);
-  background: rgba(255,255,255,.62);
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .bbx-connect-panel {
@@ -313,7 +337,7 @@ ion-content::part(background) {
   padding: 22px;
   background: linear-gradient(135deg, #fff, #eff6ff);
   box-shadow: var(--bbx-shadow);
-  border: 1px solid rgba(108,92,255,.12);
+  border: 1px solid rgba(108, 92, 255, 0.12);
 }
 
 .bbx-status-badge {
@@ -324,19 +348,19 @@ ion-content::part(background) {
   padding: 9px 12px;
   font-weight: 950;
   font-size: 12px;
-  background: rgba(22,163,74,.12);
+  background: rgba(22, 163, 74, 0.12);
   color: #15803d;
 }
 
 .bbx-status-badge.off {
-  background: rgba(245,158,11,.14);
+  background: rgba(245, 158, 11, 0.14);
   color: #a16207;
 }
 
 .bbx-input {
   --background: #fff;
   --border-radius: 18px;
-  --border-color: rgba(18,22,41,.08);
+  --border-color: rgba(18, 22, 41, 0.08);
   --padding-start: 14px;
   --inner-padding-end: 14px;
   border-radius: 18px;
@@ -354,7 +378,7 @@ ion-content::part(background) {
   border-radius: 15px;
   padding: 10px 13px;
   font-weight: 900;
-  box-shadow: 0 10px 25px rgba(22,26,52,.07);
+  box-shadow: 0 10px 25px rgba(22, 26, 52, 0.07);
 }
 
 .bbx-tabbar {
@@ -368,10 +392,10 @@ ion-content::part(background) {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  background: rgba(255,255,255,.86);
-  box-shadow: 0 18px 48px rgba(18,22,41,.16);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 18px 48px rgba(18, 22, 41, 0.16);
   backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,.9);
+  border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
 .bbx-tabbar button {
@@ -420,7 +444,7 @@ ion-content::part(background) {
 .bbx-score {
   font-weight: 950;
   font-size: 20px;
-  letter-spacing: -.06em;
+  letter-spacing: -0.06em;
   color: var(--bbx-primary);
 }
 
@@ -446,4 +470,58 @@ ion-content::part(background) {
   color: #5b4bff;
   box-shadow: 0 0 0 2px rgba(91, 75, 255, 0.18);
   transform: translateY(-1px);
+}
+
+.bbx-settings-card {
+  padding: 14px;
+  margin-bottom: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bbx-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bbx-mini-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255, 215, 0, 0.16);
+  color: #fed700;
+}
+
+.bbx-select-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bbx-select-box {
+  border-radius: 14px;
+  padding: 9px 12px;
+  background: rgba(201, 201, 201, 0.15);
+}
+
+.bbx-select-box label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.65;
+  margin-bottom: 2px;
+}
+
+.bbx-compact-select {
+  width: 100%;
+  min-height: 28px;
+  font-size: 14px;
+  font-weight: 800;
+  --padding-start: 0;
+  --padding-end: 0;
 }

@@ -8,6 +8,8 @@ import {
   IonPage,
   IonText,
   IonTextarea,
+  IonSelect,
+  IonSelectOption,
 } from "@ionic/react";
 import { useEffect, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -24,7 +26,18 @@ import {
   addParticipantsBulk,
   shuffleParticipants,
   startTournament,
+  updateTournamentTieBreaks,
 } from "../api/challonge";
+
+const tieBreakOptions = [
+  { value: "wins vs tied participants", label: "Wins vs Tied" },
+  { value: "game/set wins", label: "Game/Set Wins" },
+  { value: "points difference", label: "Points Diff" },
+  { value: "points scored", label: "Points Scored" },
+  { value: "buchholz", label: "Buchholz" },
+  { value: "median buchholz", label: "Median Buchholz" },
+  { value: "sonneborn berger", label: "Sonneborn-Berger" },
+];
 
 const unwrapTournament = (data: any) =>
   data?.tournament || data?.data?.tournament || data?.data || data || {};
@@ -42,6 +55,11 @@ const asId = (value: any) => {
   if (raw === null || raw === undefined || raw === "") return null;
   return String(raw);
 };
+
+const prettyText = (value: any) =>
+  String(value || "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
 const getMatchPlayerId = (match: any, side: "player1" | "player2") => {
   const m = unwrapMatch(match);
@@ -126,6 +144,23 @@ const TournamentDetail: React.FC = () => {
   const [bulkNames, setBulkNames] = useState("");
   const [addingBulk, setAddingBulk] = useState(false);
 
+  const attrs = tournament?.attributes || tournament || {};
+  const roundRobinOptions = attrs.round_robin_options || {};
+  const swissOptions = attrs.swiss_options || {};
+  const tieBreaks = Array.isArray(attrs.tie_breaks) ? attrs.tie_breaks : [];
+  const ranking = roundRobinOptions.ranking || swissOptions.ranking;
+
+  console.log("TOURNAMENT", tournament);
+  console.log("ATTRS", attrs);
+  console.log("ROUND ROBIN", roundRobinOptions);
+  console.log("SWISS", swissOptions);
+  console.log("TIE BREAKS", tieBreaks);
+
+  const [savingTieBreaks, setSavingTieBreaks] = useState(false);
+  const [tieBreak1, setTieBreak1] = useState("points difference");
+  const [tieBreak2, setTieBreak2] = useState("points scored");
+  const [tieBreak3, setTieBreak3] = useState("median buchholz");
+
   const load = async () => {
     try {
       const [t, m, p, s] = await Promise.all([
@@ -209,6 +244,24 @@ const TournamentDetail: React.FC = () => {
       );
     } finally {
       setAddingBulk(false);
+    }
+  };
+
+  const saveTieBreaks = async () => {
+    try {
+      setSavingTieBreaks(true);
+
+      await updateTournamentTieBreaks(id, {
+        ranking: "match wins",
+        tie_breaks: [tieBreak1, tieBreak2, tieBreak3],
+      });
+
+      setMessage("Tie breaks updated.");
+      await load();
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || "Could not update tie breaks.");
+    } finally {
+      setSavingTieBreaks(false);
     }
   };
 
@@ -314,8 +367,9 @@ const TournamentDetail: React.FC = () => {
   };
 
   const title = tournament?.name || tournament?.title || "Tournament";
-  const state = tournament?.state || "ready";
-  const type = tournament?.tournament_type || tournament?.type || "Beyblade X";
+  const state = tournament?.state || attrs?.state || "ready";
+  const type =
+    tournament?.tournament_type || attrs?.tournament_type || "Beyblade X";
 
   const filteredMatches = useMemo(() => {
     const q = matchSearch.trim().toLowerCase();
@@ -354,11 +408,6 @@ const TournamentDetail: React.FC = () => {
     });
   }, [participants, playerSearch]);
 
-  const currentList = useMemo(
-    () => ({ matches, players: participants, standings }[tab]),
-    [tab, matches, participants, standings]
-  );
-
   const standingDiff = (data: any) =>
     (Number(data?.pointsScored) || 0) - (Number(data?.pointsAgainst) || 0);
 
@@ -382,8 +431,7 @@ const TournamentDetail: React.FC = () => {
                 {title}
               </h1>
               <p className="bbx-subtitle">
-                {String(type).replaceAll("_", " ")} ·{" "}
-                {String(state).replaceAll("_", " ")}
+                {prettyText(type)} · {prettyText(state)}
               </p>
             </div>
 
@@ -418,6 +466,64 @@ const TournamentDetail: React.FC = () => {
               ▶ Start Tournament
             </button>
           </div>
+
+          <section
+            className="bbx-soft-card"
+            style={{ padding: 16, marginBottom: 18 }}
+          >
+            <section className="bbx-settings-card">
+              <div className="bbx-settings-header">
+                <span className="bbx-kicker">Tournament Settings</span>
+                <button
+                  className="bbx-mini-button"
+                  onClick={() => {
+                    setTieBreak1("points difference");
+                    setTieBreak2("points scored");
+                    setTieBreak3("median buchholz");
+                  }}
+                >
+                  BBX Preset
+                </button>
+              </div>
+
+              <div className="bbx-select-grid">
+                {[
+                  ["Tie Break #1", tieBreak1, setTieBreak1],
+                  ["Tie Break #2", tieBreak2, setTieBreak2],
+                  ["Tie Break #3", tieBreak3, setTieBreak3],
+                ].map(([label, value, setter]: any) => (
+                  <div className="bbx-select-box" key={label}>
+                    <label>{label}</label>
+
+                    <IonSelect
+                      value={value}
+                      interface="popover"
+                      onIonChange={(e) => setter(e.detail.value)}
+                      className="bbx-compact-select"
+                    >
+                      {tieBreakOptions.map((option) => (
+                        <IonSelectOption
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className="bbx-button primary"
+                style={{ width: "100%", marginTop: 12 }}
+                disabled={savingTieBreaks}
+                onClick={saveTieBreaks}
+              >
+                {savingTieBreaks ? "Saving..." : "Save Tie Breaks"}
+              </button>
+            </section>
+          </section>
 
           <div
             className="bbx-tabbar"
@@ -541,7 +647,7 @@ const TournamentDetail: React.FC = () => {
                           Diff: {standingDiff(data)}
                         </span>
                         <span className="bbx-chip">
-                          Pts Diff: {data?.pointsAgainst ?? 0}
+                          Pts Against: {data?.pointsAgainst ?? 0}
                         </span>
                         <span className="bbx-chip">
                           Pts Scored: {data?.pointsScored ?? 0}
@@ -580,9 +686,10 @@ const TournamentDetail: React.FC = () => {
                 >
                   {addingParticipant ? "Adding…" : "+ Add Player"}
                 </button>
+
                 <section
                   className="bbx-soft-card"
-                  style={{ padding: 16, marginBottom: 16 }}
+                  style={{ padding: 16, marginTop: 16 }}
                 >
                   <p className="bbx-subtitle" style={{ marginTop: 0 }}>
                     Bulk paste players, one name per line.
