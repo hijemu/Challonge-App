@@ -436,3 +436,14 @@ ion-content::part(background) {
     transform: translateX(-50%);
   }
 }
+
+.bbx-player-pill {
+  transition: 0.18s ease;
+}
+
+.bbx-player-pill.active {
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  color: #5b4bff;
+  box-shadow: 0 0 0 2px rgba(91, 75, 255, 0.18);
+  transform: translateY(-1px);
+}

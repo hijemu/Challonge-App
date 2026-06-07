@@ -168,13 +168,28 @@ function normalizeTournament(row) {
   };
 }
 
-function relationId(attrs, key) {
-  return Number(attrs.relationships?.[key]?.data?.id || attrs[key + '_id'] || 0) || null;
+function relationId(row, key) {
+  const attrs = row.attributes || row;
+  return Number(
+    row.relationships?.[key]?.data?.id ||
+    attrs.relationships?.[key]?.data?.id ||
+    attrs[key + '_id'] ||
+    attrs[key]?.id ||
+    0
+  ) || null;
 }
 
 function normalizeMatch(row, tournamentId) {
   if (row.match) return row;
+
   const attrs = row.attributes || {};
+  const points = Array.isArray(attrs.points_by_participant)
+    ? attrs.points_by_participant
+    : [];
+
+  const p1 = points[0]?.participant_id || null;
+  const p2 = points[1]?.participant_id || null;
+
   return {
     match: {
       id: Number(row.id),
@@ -184,8 +199,8 @@ function normalizeMatch(row, tournamentId) {
       identifier: attrs.identifier,
       scores_csv: attrs.scores || attrs.scores_csv || '',
       winner_id: Number(attrs.winner_id || 0) || null,
-      player1_id: relationId(attrs, 'player1'),
-      player2_id: relationId(attrs, 'player2'),
+      player1_id: Number(p1) || relationId(row, 'player1'),
+      player2_id: Number(p2) || relationId(row, 'player2'),
       suggested_play_order: attrs.suggested_play_order,
     },
   };
@@ -409,6 +424,10 @@ app.get('/tournaments/:id/matches', requireAuth, async (req, res) => {
       return res.json(response.data);
     }
     const rows = await listAll(client, `/tournaments/${req.params.id}/matches.json`);
+    console.log(
+      "RAW MATCH FROM CHALLONGE:",
+      JSON.stringify(rows[0], null, 2)
+    );
     res.json(rows.map((row) => normalizeMatch(row, req.params.id)));
   } catch (err) {
     res.status(err.response?.status || 500).json({ error: err.message, details: err.response?.data });
