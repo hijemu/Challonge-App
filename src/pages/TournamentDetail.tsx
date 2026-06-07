@@ -7,6 +7,7 @@ import {
   IonModal,
   IonPage,
   IonText,
+  IonTextarea,
 } from "@ionic/react";
 import { useEffect, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -18,6 +19,12 @@ import api, {
 } from "../api/challonge";
 import MatchCard from "../components/MatchCard";
 import "../theme/bbx.css";
+import {
+  addParticipant,
+  addParticipantsBulk,
+  shuffleParticipants,
+  startTournament,
+} from "../api/challonge";
 
 const unwrapTournament = (data: any) =>
   data?.tournament || data?.data?.tournament || data?.data || data || {};
@@ -113,6 +120,12 @@ const TournamentDetail: React.FC = () => {
   const [p2Score, setP2Score] = useState(0);
   const [saving, setSaving] = useState(false);
 
+  const [newParticipantName, setNewParticipantName] = useState("");
+  const [addingParticipant, setAddingParticipant] = useState(false);
+
+  const [bulkNames, setBulkNames] = useState("");
+  const [addingBulk, setAddingBulk] = useState(false);
+
   const load = async () => {
     try {
       const [t, m, p, s] = await Promise.all([
@@ -146,6 +159,80 @@ const TournamentDetail: React.FC = () => {
 
     return map;
   }, [participants]);
+
+  const submitParticipant = async () => {
+    try {
+      if (!newParticipantName.trim()) return;
+
+      setAddingParticipant(true);
+
+      await addParticipant(id, {
+        name: newParticipantName.trim(),
+      });
+
+      setNewParticipantName("");
+      await load();
+    } catch (err: any) {
+      setMessage(
+        err.response?.data?.error ||
+          err.response?.data?.details?.errors?.[0]?.detail ||
+          "Could not add participant."
+      );
+    } finally {
+      setAddingParticipant(false);
+    }
+  };
+
+  const submitBulkParticipants = async () => {
+    try {
+      const names = bulkNames
+        .split(/\r?\n/)
+        .map((name) => name.trim())
+        .filter(Boolean);
+
+      if (!names.length) {
+        setMessage("Paste at least one player name.");
+        return;
+      }
+
+      setAddingBulk(true);
+
+      await addParticipantsBulk(id, names);
+
+      setBulkNames("");
+      await load();
+    } catch (err: any) {
+      setMessage(
+        err.response?.data?.error ||
+          err.response?.data?.details?.errors?.[0]?.detail ||
+          "Could not add bulk participants."
+      );
+    } finally {
+      setAddingBulk(false);
+    }
+  };
+
+  const shuffleSeeds = async () => {
+    try {
+      await shuffleParticipants(id);
+      setMessage("Participants shuffled.");
+      await load();
+    } catch (err: any) {
+      setMessage(
+        err.response?.data?.error || "Could not shuffle participants."
+      );
+    }
+  };
+
+  const startBracket = async () => {
+    try {
+      await startTournament(id);
+      setMessage("Tournament started.");
+      await load();
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || "Could not start tournament.");
+    }
+  };
 
   const getPlayerName = (match: any, side: "player1" | "player2") => {
     const embedded = getMatchEmbeddedName(match, side);
@@ -242,9 +329,15 @@ const TournamentDetail: React.FC = () => {
       return (
         p1.includes(q) ||
         p2.includes(q) ||
-        String(m.identifier || "").toLowerCase().includes(q) ||
-        String(m.round || "").toLowerCase().includes(q) ||
-        String(m.state || "").toLowerCase().includes(q)
+        String(m.identifier || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(m.round || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(m.state || "")
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [matches, matchSearch, participantMap]);
@@ -316,6 +409,16 @@ const TournamentDetail: React.FC = () => {
             </IonText>
           )}
 
+          <div className="bbx-action-row">
+            <button className="bbx-button ghost" onClick={shuffleSeeds}>
+              🔀 Shuffle Seeds
+            </button>
+
+            <button className="bbx-button primary" onClick={startBracket}>
+              ▶ Start Tournament
+            </button>
+          </div>
+
           <div
             className="bbx-tabbar"
             style={{
@@ -356,9 +459,7 @@ const TournamentDetail: React.FC = () => {
               <IonInput
                 placeholder="Search matches, players, round, state..."
                 value={matchSearch}
-                onIonInput={(e) =>
-                  setMatchSearch(String(e.detail.value || ""))
-                }
+                onIonInput={(e) => setMatchSearch(String(e.detail.value || ""))}
               />
             </IonItem>
           )}
@@ -455,8 +556,60 @@ const TournamentDetail: React.FC = () => {
               <div className="bbx-empty">No matches found.</div>
             )}
 
-            {tab === "players" && !filteredPlayers.length && (
-              <div className="bbx-empty">No players found.</div>
+            {tab === "players" && (
+              <section
+                className="bbx-soft-card"
+                style={{ padding: 16, marginBottom: 16 }}
+              >
+                <IonItem className="bbx-input" lines="none">
+                  <IonLabel position="stacked">Add Participant</IonLabel>
+                  <IonInput
+                    value={newParticipantName}
+                    placeholder="Player name"
+                    onIonInput={(e) =>
+                      setNewParticipantName(String(e.detail.value || ""))
+                    }
+                  />
+                </IonItem>
+
+                <button
+                  className="bbx-button primary"
+                  style={{ width: "100%", marginTop: 12 }}
+                  disabled={addingParticipant}
+                  onClick={submitParticipant}
+                >
+                  {addingParticipant ? "Adding…" : "+ Add Player"}
+                </button>
+                <section
+                  className="bbx-soft-card"
+                  style={{ padding: 16, marginBottom: 16 }}
+                >
+                  <p className="bbx-subtitle" style={{ marginTop: 0 }}>
+                    Bulk paste players, one name per line.
+                  </p>
+
+                  <IonItem className="bbx-input" lines="none">
+                    <IonLabel position="stacked">Bulk Participants</IonLabel>
+                    <IonTextarea
+                      value={bulkNames}
+                      autoGrow
+                      placeholder={`Player 1\nPlayer 2\nPlayer 3`}
+                      onIonInput={(e) =>
+                        setBulkNames(String(e.detail.value || ""))
+                      }
+                    />
+                  </IonItem>
+
+                  <button
+                    className="bbx-button ghost"
+                    style={{ width: "100%", marginTop: 12 }}
+                    disabled={addingBulk}
+                    onClick={submitBulkParticipants}
+                  >
+                    {addingBulk ? "Adding…" : "+ Add Bulk Players"}
+                  </button>
+                </section>
+              </section>
             )}
 
             {tab === "standings" && !standings.length && (
@@ -538,9 +691,7 @@ const TournamentDetail: React.FC = () => {
                       <IonButton onClick={() => addPoints(1)}>
                         Warning +1
                       </IonButton>
-                      <IonButton onClick={() => addPoints(4)}>
-                        DQ 4-0
-                      </IonButton>
+                      <IonButton onClick={() => addPoints(4)}>DQ 4-0</IonButton>
                     </div>
                   </div>
 

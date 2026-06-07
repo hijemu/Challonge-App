@@ -26,3 +26,18 @@ export const getChallongeConnectUrl = async () => (await api.get('/challonge/con
 export const disconnectChallonge = async () => (await api.delete('/challonge/disconnect')).data;
 export const connectApiKeyForDev = async (api_key: string) =>
   (await api.post('/challonge/connect-api-key', { api_key })).data;
+export const createTournament = async (payload: any) =>
+  (await api.post('/tournaments', payload)).data;
+  export const addParticipant = async (
+    tournamentId: string,
+    payload: any
+  ) => (await api.post(`/tournaments/${tournamentId}/participants`, payload)).data;
+export const addParticipantsBulk = async (
+    tournamentId: string,
+    names: string[]
+  ) => (await api.post(`/tournaments/${tournamentId}/participants/bulk`, { names })).data;
+  export const shuffleParticipants = async (tournamentId: string) =>
+  (await api.post(`/tournaments/${tournamentId}/participants/shuffle`)).data;
+
+export const startTournament = async (tournamentId: string) =>
+  (await api.post(`/tournaments/${tournamentId}/start`)).data;

@@ -7,6 +7,7 @@ import Tournaments from './pages/Tournaments';
 import TournamentDetail from './pages/TournamentDetail';
 import ConnectChallonge from './pages/ConnectChallonge';
 import { AuthProvider } from './context/AuthContext';
+import CreateTournament from './pages/CreateTournament';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -22,6 +23,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <IonReactRouter>
           <IonRouterOutlet>
+            <Route exact path="/create-tournament" component={CreateTournament} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/connect-challonge" component={ConnectChallonge} />
             <Route exact path="/tournaments" component={Tournaments} />
