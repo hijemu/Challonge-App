@@ -1,9 +1,14 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://api-test-cmxie.duckdns.org';
+
+console.log('API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
 });
 
 api.interceptors.request.use((config) => {
@@ -23,4 +28,5 @@ export const getStandings = async (id: string) => (await api.get(`/tournaments/$
 export const getChallongeStatus = async () => (await api.get('/challonge/status')).data;
 export const getChallongeConnectUrl = async () => (await api.get('/challonge/connect')).data;
 export const disconnectChallonge = async () => (await api.delete('/challonge/disconnect')).data;
-export const connectApiKeyForDev = async (api_key: string) => (await api.post('/challonge/connect-api-key', { api_key })).data;
+export const connectApiKeyForDev = async (api_key: string) =>
+  (await api.post('/challonge/connect-api-key', { api_key })).data;
