@@ -457,72 +457,18 @@ const TournamentDetail: React.FC = () => {
             </IonText>
           )}
 
-          <div className="bbx-action-row">
-            <button className="bbx-button ghost" onClick={shuffleSeeds}>
-              🔀 Shuffle Seeds
-            </button>
-
-            <button className="bbx-button primary" onClick={startBracket}>
-              ▶ Start Tournament
-            </button>
-          </div>
-
           <section
-            className="bbx-soft-card"
-            style={{ padding: 16, marginBottom: 18 }}
-          >
-            <section className="bbx-settings-card">
-              <div className="bbx-settings-header">
-                <span className="bbx-kicker">Tournament Settings</span>
-                <button
-                  className="bbx-mini-button"
-                  onClick={() => {
-                    setTieBreak1("points difference");
-                    setTieBreak2("points scored");
-                    setTieBreak3("median buchholz");
-                  }}
-                >
-                  BBX Preset
-                </button>
-              </div>
-
-              <div className="bbx-select-grid">
-                {[
-                  ["Tie Break #1", tieBreak1, setTieBreak1],
-                  ["Tie Break #2", tieBreak2, setTieBreak2],
-                  ["Tie Break #3", tieBreak3, setTieBreak3],
-                ].map(([label, value, setter]: any) => (
-                  <div className="bbx-select-box" key={label}>
-                    <label>{label}</label>
-
-                    <IonSelect
-                      value={value}
-                      interface="popover"
-                      onIonChange={(e) => setter(e.detail.value)}
-                      className="bbx-compact-select"
-                    >
-                      {tieBreakOptions.map((option) => (
-                        <IonSelectOption
-                          key={option.value}
-                          value={option.value}
-                        >
-                          {option.label}
-                        </IonSelectOption>
-                      ))}
-                    </IonSelect>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                className="bbx-button primary"
-                style={{ width: "100%", marginTop: 12 }}
-                disabled={savingTieBreaks}
-                onClick={saveTieBreaks}
-              >
-                {savingTieBreaks ? "Saving..." : "Save Tie Breaks"}
+          className="bbx-card-buttons"
+          style={{ padding: 5, marginBottom: 18 }}>
+            <div className="bbx-action-row">
+              <button className="bbx-button ghost" onClick={shuffleSeeds}>
+                🔀 Shuffle Seeds
               </button>
-            </section>
+
+              <button className="bbx-button primary" onClick={startBracket}>
+                ▶ Start Tournament
+              </button>
+            </div>
           </section>
 
           <div
