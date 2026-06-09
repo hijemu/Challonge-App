@@ -8,6 +8,8 @@ import TournamentDetail from "./pages/TournamentDetail";
 import ConnectChallonge from "./pages/ConnectChallonge";
 import { AuthProvider } from "./context/AuthContext";
 import CreateTournament from "./pages/CreateTournament";
+import OfflineTournaments from "./pages/OfflineTournaments";
+import OfflineTournamentDetail from "./pages/OfflineTournamentDetail";
 
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/normalize.css";
@@ -43,6 +45,8 @@ const App: React.FC = () => {
                 <Redirect to="/login" />
               )}
             </Route>
+            <Route exact path="/offline" component={OfflineTournaments} />
+            <Route exact path="/offline/:id" component={OfflineTournamentDetail} />
           </IonRouterOutlet>
         </IonReactRouter>
       </AuthProvider>

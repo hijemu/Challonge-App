@@ -202,15 +202,16 @@ const Tournaments: React.FC = () => {
             Dashboard
           </button>
 
-          <button onClick={() => history.push("/connect-challonge")}>
-            🔗
-            <br />
-            Connect
-          </button>
-
           <button onClick={() => history.push("/create-tournament")}>
             ➕<br />
             Create
+          </button>
+
+          <button
+            className="bbx-button ghost"
+            onClick={() => history.push("/offline")}
+          >
+            📱 Offline Mode
           </button>
         </nav>
       </IonContent>

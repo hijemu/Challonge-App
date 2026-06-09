@@ -1,5 +1,4 @@
 import {
-  IonButton,
   IonContent,
   IonInput,
   IonItem,
@@ -8,8 +7,6 @@ import {
   IonPage,
   IonText,
   IonTextarea,
-  IonSelect,
-  IonSelectOption,
 } from "@ionic/react";
 import { useEffect, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -18,31 +15,29 @@ import api, {
   getParticipants,
   getStandings,
   getTournament,
-} from "../api/challonge";
-import MatchCard from "../components/MatchCard";
-import "../theme/bbx.css";
-import {
   addParticipant,
   addParticipantsBulk,
   shuffleParticipants,
   startTournament,
-  updateTournamentTieBreaks,
 } from "../api/challonge";
+import MatchCard from "../components/MatchCard";
+import "../theme/bbx.css";
 import {
   createEmptyBbxStats,
   exportBbxStatsToExcel,
   saveBbxPlayerMatchStats,
 } from "../utils/bbxStats";
 
-const tieBreakOptions = [
-  { value: "wins vs tied participants", label: "Wins vs Tied" },
-  { value: "game/set wins", label: "Game/Set Wins" },
-  { value: "points difference", label: "Points Diff" },
-  { value: "points scored", label: "Points Scored" },
-  { value: "buchholz", label: "Buchholz" },
-  { value: "median buchholz", label: "Median Buchholz" },
-  { value: "sonneborn berger", label: "Sonneborn-Berger" },
-];
+type BbxStats = ReturnType<typeof createEmptyBbxStats>;
+
+type HistoryAction = {
+  side: "p1" | "p2";
+  type: "xtreme" | "over" | "burst" | "spin" | "warning" | "dq";
+  points: number;
+  prevP1Score: number;
+  prevP2Score: number;
+  prevStats: BbxStats;
+};
 
 const unwrapTournament = (data: any) =>
   data?.tournament || data?.data?.tournament || data?.data || data || {};
@@ -65,6 +60,9 @@ const prettyText = (value: any) =>
   String(value || "")
     .replaceAll("_", " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+const cloneBbxStats = (stats: BbxStats): BbxStats =>
+  JSON.parse(JSON.stringify(stats));
 
 const getMatchPlayerId = (match: any, side: "player1" | "player2") => {
   const m = unwrapMatch(match);
@@ -143,6 +141,9 @@ const TournamentDetail: React.FC = () => {
   const [p2Score, setP2Score] = useState(0);
   const [saving, setSaving] = useState(false);
 
+  const [bbxStats, setBbxStats] = useState(createEmptyBbxStats());
+  const [historyActions, setHistoryActions] = useState<HistoryAction[]>([]);
+
   const [newParticipantName, setNewParticipantName] = useState("");
   const [addingParticipant, setAddingParticipant] = useState(false);
 
@@ -150,22 +151,6 @@ const TournamentDetail: React.FC = () => {
   const [addingBulk, setAddingBulk] = useState(false);
 
   const attrs = tournament?.attributes || tournament || {};
-  const roundRobinOptions = attrs.round_robin_options || {};
-  const swissOptions = attrs.swiss_options || {};
-  const tieBreaks = Array.isArray(attrs.tie_breaks) ? attrs.tie_breaks : [];
-  const ranking = roundRobinOptions.ranking || swissOptions.ranking;
-  const [bbxStats, setBbxStats] = useState(createEmptyBbxStats());
-
-  console.log("TOURNAMENT", tournament);
-  console.log("ATTRS", attrs);
-  console.log("ROUND ROBIN", roundRobinOptions);
-  console.log("SWISS", swissOptions);
-  console.log("TIE BREAKS", tieBreaks);
-
-  const [savingTieBreaks, setSavingTieBreaks] = useState(false);
-  const [tieBreak1, setTieBreak1] = useState("points difference");
-  const [tieBreak2, setTieBreak2] = useState("points scored");
-  const [tieBreak3, setTieBreak3] = useState("median buchholz");
 
   const load = async () => {
     try {
@@ -253,33 +238,13 @@ const TournamentDetail: React.FC = () => {
     }
   };
 
-  const saveTieBreaks = async () => {
-    try {
-      setSavingTieBreaks(true);
-
-      await updateTournamentTieBreaks(id, {
-        ranking: "match wins",
-        tie_breaks: [tieBreak1, tieBreak2, tieBreak3],
-      });
-
-      setMessage("Tie breaks updated.");
-      await load();
-    } catch (err: any) {
-      setMessage(err.response?.data?.error || "Could not update tie breaks.");
-    } finally {
-      setSavingTieBreaks(false);
-    }
-  };
-
   const shuffleSeeds = async () => {
     try {
       await shuffleParticipants(id);
       setMessage("Participants shuffled.");
       await load();
     } catch (err: any) {
-      setMessage(
-        err.response?.data?.error || "Could not shuffle participants."
-      );
+      setMessage(err.response?.data?.error || "Could not shuffle participants.");
     }
   };
 
@@ -296,14 +261,10 @@ const TournamentDetail: React.FC = () => {
   const handleFinalizeGroupStage = async () => {
     try {
       await api.post(`/tournaments/${id}/finalize-group-stage`);
-
       await load();
-
       setMessage("Group stage finalized.");
     } catch (err: any) {
-      setMessage(
-        err.response?.data?.error || "Could not finalize group stage."
-      );
+      setMessage(err.response?.data?.error || "Could not finalize group stage.");
     }
   };
 
@@ -329,6 +290,15 @@ const TournamentDetail: React.FC = () => {
     return getMatchPlayerId(match, side);
   };
 
+  const closeScoreModal = () => {
+    setSelectedMatch(null);
+    setHistoryActions([]);
+    setP1Score(0);
+    setP2Score(0);
+    setBbxStats(createEmptyBbxStats());
+    setActiveScorer("p1");
+  };
+
   const openScoreModal = (match: any) => {
     const m = unwrapMatch(match);
     const [a, b] = parseScore(m.scores_csv || m.scores || m.score || "0-0");
@@ -337,6 +307,7 @@ const TournamentDetail: React.FC = () => {
     setP1Score(a);
     setP2Score(b);
     setActiveScorer("p1");
+    setHistoryActions([]);
     setBbxStats(createEmptyBbxStats());
   };
 
@@ -345,6 +316,18 @@ const TournamentDetail: React.FC = () => {
     points: number
   ) => {
     const side = activeScorer === "p1" ? "p1" : "p2";
+
+    setHistoryActions((prev) => [
+      ...prev,
+      {
+        side,
+        type,
+        points,
+        prevP1Score: p1Score,
+        prevP2Score: p2Score,
+        prevStats: cloneBbxStats(bbxStats),
+      },
+    ]);
 
     setBbxStats((prev) => ({
       ...prev,
@@ -355,7 +338,7 @@ const TournamentDetail: React.FC = () => {
       },
     }));
 
-    if (activeScorer === "p1") {
+    if (side === "p1") {
       setP1Score((v) => v + points);
     } else {
       setP2Score((v) => v + points);
@@ -364,6 +347,18 @@ const TournamentDetail: React.FC = () => {
 
   const applyDq = () => {
     const side = activeScorer === "p1" ? "p1" : "p2";
+
+    setHistoryActions((prev) => [
+      ...prev,
+      {
+        side,
+        type: "dq",
+        points: 0,
+        prevP1Score: p1Score,
+        prevP2Score: p2Score,
+        prevStats: cloneBbxStats(bbxStats),
+      },
+    ]);
 
     setBbxStats((prev) => ({
       ...prev,
@@ -387,9 +382,32 @@ const TournamentDetail: React.FC = () => {
     }
   };
 
+  const undoLastAction = () => {
+    const last = historyActions[historyActions.length - 1];
+    if (!last) return;
+
+    setHistoryActions((prev) => prev.slice(0, -1));
+    setP1Score(last.prevP1Score);
+    setP2Score(last.prevP2Score);
+    setBbxStats(last.prevStats);
+  };
+
   const resetScore = () => {
+    setHistoryActions((prev) => [
+      ...prev,
+      {
+        side: activeScorer,
+        type: "warning",
+        points: 0,
+        prevP1Score: p1Score,
+        prevP2Score: p2Score,
+        prevStats: cloneBbxStats(bbxStats),
+      },
+    ]);
+
     setP1Score(0);
     setP2Score(0);
+    setBbxStats(createEmptyBbxStats());
   };
 
   const saveScore = async () => {
@@ -436,7 +454,7 @@ const TournamentDetail: React.FC = () => {
         },
       ]);
 
-      setSelectedMatch(null);
+      closeScoreModal();
       await load();
     } catch (err: any) {
       setMessage(err.response?.data?.error || "Could not save score.");
@@ -538,6 +556,8 @@ const TournamentDetail: React.FC = () => {
 
   const standingDiff = (data: any) =>
     (Number(data?.pointsScored) || 0) - (Number(data?.pointsAgainst) || 0);
+
+  const lastAction = historyActions[historyActions.length - 1];
 
   return (
     <IonPage>
@@ -797,9 +817,6 @@ const TournamentDetail: React.FC = () => {
                         <span className="bbx-chip">
                           Diff: {standingDiff(data)}
                         </span>
-                        {/* <span className="bbx-chip">
-                          Pts Against: {data?.pointsAgainst ?? 0}
-                        </span> */}
                         <span className="bbx-chip">
                           Pts Scored: {data?.pointsScored ?? 0}
                         </span>
@@ -876,127 +893,135 @@ const TournamentDetail: React.FC = () => {
           </div>
         </main>
 
-        <IonModal
-          isOpen={!!selectedMatch}
-          onDidDismiss={() => setSelectedMatch(null)}
-        >
+        <IonModal isOpen={!!selectedMatch} onDidDismiss={closeScoreModal}>
           <IonContent className="ion-padding">
             <main className="bbx-page" style={{ maxWidth: 560 }}>
-              <h1 className="bbx-title" style={{ padding: 20, fontSize: 25 }}>
+              <h1 className="bbx-title" style={{ padding: 10, fontSize: 28 }}>
                 Edit Score
               </h1>
 
               {selectedMatch && (
-                <>
-                  <div
-                    className="bbx-tournament-card"
-                    style={{ display: "block" }}
-                  >
-                    <div className="bbx-versus" style={{ marginBottom: 16 }}>
-                      <button
-                        type="button"
-                        className={`bbx-player-pill ${
-                          activeScorer === "p1" ? "active" : ""
-                        }`}
-                        onClick={() => setActiveScorer("p1")}
-                      >
-                        {getPlayerName(selectedMatch, "player1")}
-                      </button>
-
-                      <div className="bbx-score">
-                        {p1Score}-{p2Score}
-                      </div>
-
-                      <button
-                        type="button"
-                        className={`bbx-player-pill ${
-                          activeScorer === "p2" ? "active" : ""
-                        }`}
-                        onClick={() => setActiveScorer("p2")}
-                      >
-                        {getPlayerName(selectedMatch, "player2")}
-                      </button>
-                    </div>
-
-                    <p className="bbx-subtitle" style={{ marginBottom: 12 }}>
-                      Selected:{" "}
-                      <strong>
-                        {activeScorer === "p1"
-                          ? getPlayerName(selectedMatch, "player1")
-                          : getPlayerName(selectedMatch, "player2")}
-                      </strong>
-                    </p>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 10,
-                      }}
+                <div
+                  className="bbx-tournament-card"
+                  style={{ display: "block" }}
+                >
+                  <div className="bbx-versus" style={{ marginBottom: 16 }}>
+                    <button
+                      type="button"
+                      className={`bbx-player-pill ${
+                        activeScorer === "p1" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveScorer("p1")}
                     >
-                      <IonButton onClick={() => addBbxPoints("xtreme", 3)}>
-                        Xtreme +3
-                      </IonButton>
-                      <IonButton onClick={() => addBbxPoints("over", 2)}>
-                        Over +2
-                      </IonButton>
-                      <IonButton onClick={() => addBbxPoints("burst", 2)}>
-                        Burst +2
-                      </IonButton>
-                      <IonButton onClick={() => addBbxPoints("spin", 1)}>
-                        Spin +1
-                      </IonButton>
-                      <IonButton onClick={() => addBbxPoints("warning", 1)}>
-                        Warning +1
-                      </IonButton>
-                      <IonButton onClick={applyDq}>DQ 4-0</IonButton>
+                      {getPlayerName(selectedMatch, "player1")}
+                    </button>
+
+                    <div className="bbx-score">
+                      {p1Score}-{p2Score}
                     </div>
+
+                    <button
+                      type="button"
+                      className={`bbx-player-pill ${
+                        activeScorer === "p2" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveScorer("p2")}
+                    >
+                      {getPlayerName(selectedMatch, "player2")}
+                    </button>
                   </div>
 
-                  <IonItem>
-                    <IonLabel position="stacked">Player 1 Score</IonLabel>
-                    <IonInput
-                      type="number"
-                      value={p1Score}
-                      onIonInput={(e) =>
-                        setP1Score(Number(e.detail.value || 0))
-                      }
-                    />
-                  </IonItem>
+                  {lastAction && (
+                    <div
+                      style={{
+                        marginBottom: 12,
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <span className="bbx-chip">
+                        Last: {lastAction.type.toUpperCase()}{" "}
+                        {lastAction.side === "p1"
+                          ? getPlayerName(selectedMatch, "player1")
+                          : getPlayerName(selectedMatch, "player2")}
+                      </span>
 
-                  <IonItem>
-                    <IonLabel position="stacked">Player 2 Score</IonLabel>
-                    <IonInput
-                      type="number"
-                      value={p2Score}
-                      onIonInput={(e) =>
-                        setP2Score(Number(e.detail.value || 0))
-                      }
-                    />
-                  </IonItem>
+                      <button
+                        type="button"
+                        className="bbx-mini-button"
+                        onClick={undoLastAction}
+                      >
+                        ↶ Undo
+                      </button>
+                    </div>
+                  )}
 
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr 1fr",
+                      gridTemplateColumns: "1fr 1fr",
                       gap: 10,
-                      marginTop: 18,
                     }}
                   >
-                    <IonButton fill="outline" onClick={resetScore}>
+                    <button
+                      className="bbx-button ghost"
+                      onClick={() => addBbxPoints("xtreme", 3)}
+                    >
+                      Xtreme +3
+                    </button>
+                    <button
+                      className="bbx-button ghost"
+                      onClick={() => addBbxPoints("over", 2)}
+                    >
+                      Over +2
+                    </button>
+                    <button
+                      className="bbx-button ghost"
+                      onClick={() => addBbxPoints("burst", 2)}
+                    >
+                      Burst +2
+                    </button>
+                    <button
+                      className="bbx-button ghost"
+                      onClick={() => addBbxPoints("spin", 1)}
+                    >
+                      Spin +1
+                    </button>
+                    <button
+                      className="bbx-button ghost"
+                      onClick={() => addBbxPoints("warning", 1)}
+                    >
+                      Warning +1
+                    </button>
+                    <button className="bbx-button danger" onClick={applyDq}>
+                      DQ 4-0
+                    </button>
+                  </div>
+
+                  <div className="bbx-action-row" style={{ marginTop: 14 }}>
+                    <button className="bbx-button ghost" onClick={resetScore}>
                       Reset
-                    </IonButton>
-                    <IonButton
-                      fill="outline"
-                      onClick={() => setSelectedMatch(null)}
+                    </button>
+
+                    <button
+                      className="bbx-button ghost"
+                      onClick={closeScoreModal}
                     >
                       Cancel
-                    </IonButton>
-                    <IonButton disabled={saving} onClick={saveScore}>
-                      {saving ? "Saving..." : "Save"}
-                    </IonButton>
+                    </button>
                   </div>
-                </>
+
+                  <button
+                    className="bbx-button primary"
+                    style={{ width: "100%", marginTop: 10 }}
+                    disabled={saving}
+                    onClick={saveScore}
+                  >
+                    {saving ? "Saving..." : "Save Score"}
+                  </button>
+                </div>
               )}
             </main>
           </IonContent>
