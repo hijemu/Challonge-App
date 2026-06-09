@@ -23,7 +23,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
 
   const submit = async () => {
-    console.log("API URL =", "https://api-test-cmxie.duckdns.org");
+    console.log("API URL =", "https://backend-cmbbx.onrender.com");
     console.log("MODE =", mode);
     console.log("EMAIL =", email);
     try {
