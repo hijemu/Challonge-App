@@ -7,19 +7,57 @@
       "password_hash": "$2b$10$N.o7NP0Npr22qEaob8OfwO1r7kYB7L.jXLg6.sX98hkiDhS6Ajn/m",
       "role": "organizer",
       "created_at": "2026-06-06T11:36:50.356Z"
+    },
+    {
+      "id": 1780813317154,
+      "name": "Shi4no",
+      "email": "shi4nogodz@gmail.com",
+      "password_hash": "$2b$10$ACmlsrE6yDrKLoXYcTODgeBHQJtTPRURia58TOcmPbT4e8s5d6eae",
+      "role": "organizer",
+      "created_at": "2026-06-07T06:21:57.251Z"
+    },
+    {
+      "id": 1780979660174,
+      "name": "Kingfisher",
+      "email": "neighbordodoko01@gmail.com",
+      "password_hash": "$2b$10$rHERO5.dJC486DX.luyBiutFvNBtqZlZRAhQCPMkHepoIgSnt7Ple",
+      "role": "organizer",
+      "created_at": "2026-06-09T04:34:20.262Z"
     }
   ],
   "challonge_connections": [
     {
-      "id": 1780745894659,
-      "created_at": "2026-06-06T11:38:14.659Z",
-      "user_id": 1780745810257,
-      "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDZW50cmFsIE1hbmlsYSB4IElsb2NvcyBFbGl0ZXMgQ2hhbGxvbmdlIEh1YiIsImp0aSI6ImE4NjExMzhhLWM4NTctNDg1Yi04OWUwLWI3YjJkZjQwOWRiYSIsImlhdCI6MTc4MDc0NTg5NCwiZXhwIjoxNzgxMzUwNjk0LCJ1c2VyIjp7ImlkIjozMzQ5MjYwLCJlbWFpbCI6ImpvYm95amhlbTI0QGdtYWlsLmNvbSIsImFwcGxpY2F0aW9uX2lkIjo1Nzg4NiwiZ3JhbnVsYXJfcGVybWlzc2lvbiI6bnVsbH19.10GyBjA-nR5ZFpgc0s9IU3cN6whTNNLbSBrKqWNdFVrqYZv49SGzoAK97kdBWb1B4J2GnJt6ytvP0mvn1SoeyQ",
-      "refresh_token": "52753659e9270b25942487231e7a594bda0fb8d994cd7ca370c670be71d605e5",
+      "id": 1780813327626,
+      "created_at": "2026-06-07T06:22:07.626Z",
+      "user_id": 1780813317154,
+      "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDZW50cmFsIE1hbmlsYSB4IElsb2NvcyBFbGl0ZXMgQ2hhbGxvbmdlIEh1YiIsImp0aSI6IjAzYjIyYmY2LThiMGMtNDNhMS05ZDFhLTY3Y2IzNDUyOTlkYiIsImlhdCI6MTc4MDgzOTMyMCwiZXhwIjoxNzgxNDQ0MTIwLCJ1c2VyIjp7ImlkIjo3Mzc3NjExLCJlbWFpbCI6ImlhbmFndXN0aW4wOTEzQGdtYWlsLmNvbSIsImFwcGxpY2F0aW9uX2lkIjo1Nzg4NiwiZ3JhbnVsYXJfcGVybWlzc2lvbiI6bnVsbH19.TH_tDEO71a2SdX8SItV18RVT6OKcDaQMbpNoiTSPlkFS0EHf4isP7xNCVevrZIz3ih0j4uQNLKYcSnMf52rK_A",
+      "refresh_token": "459bece374a69b3f62865f287fe359dcfb5c1113f219be7a98082cdbcf67b0b3",
       "token_type": "Bearer",
       "scope": "me tournaments:read tournaments:write matches:read matches:write participants:read participants:write",
-      "expires_at": "2026-06-13T11:38:14.659Z",
-      "updated_at": "2026-06-06T11:38:14.659Z"
+      "expires_at": "2026-06-14T13:35:20.269Z",
+      "updated_at": "2026-06-07T13:35:20.269Z"
+    },
+    {
+      "id": 1780839493860,
+      "created_at": "2026-06-07T13:38:13.860Z",
+      "user_id": 1780745810257,
+      "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDZW50cmFsIE1hbmlsYSB4IElsb2NvcyBFbGl0ZXMgQ2hhbGxvbmdlIEh1YiIsImp0aSI6IjBkNDdhYzc0LTFlZGItNGIxYy04MjBlLWY0YmI2NzliMmE5ZSIsImlhdCI6MTc4MDgzOTQ5MywiZXhwIjoxNzgxNDQ0MjkzLCJ1c2VyIjp7ImlkIjozMzQ5MjYwLCJlbWFpbCI6ImpvYm95amhlbTI0QGdtYWlsLmNvbSIsImFwcGxpY2F0aW9uX2lkIjo1Nzg4NiwiZ3JhbnVsYXJfcGVybWlzc2lvbiI6bnVsbH19.9on-P2MBEpcbIndR1xKy0wpgyygDtNDG5DFCEjP2HD0vyIqSuSEYhP76GSTHK1nNQA1ZjSslJsjehEGXMAQc5A",
+      "refresh_token": "bfb53c7b161d24a37a5b62ecc26c8203b6f28faa8b0b3b21414a9e583e9a6cb4",
+      "token_type": "Bearer",
+      "scope": "me tournaments:read tournaments:write matches:read matches:write participants:read participants:write",
+      "expires_at": "2026-06-14T13:38:13.860Z",
+      "updated_at": "2026-06-07T13:38:13.860Z"
+    },
+    {
+      "id": 1780979747961,
+      "created_at": "2026-06-09T04:35:47.961Z",
+      "user_id": 1780979660174,
+      "access_token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDZW50cmFsIE1hbmlsYSB4IElsb2NvcyBFbGl0ZXMgQ2hhbGxvbmdlIEh1YiIsImp0aSI6IjA0MjNhODc2LTRlMmUtNDQ3NS05MmQ5LTg2NDMzMDE2YmYzNiIsImlhdCI6MTc4MDk4MTA1MSwiZXhwIjoxNzgxNTg1ODUxLCJ1c2VyIjp7ImlkIjo3MjUzNTYxLCJlbWFpbCI6ImV6cmFwdW56YWxhbjlAZ21haWwuY29tIiwiYXBwbGljYXRpb25faWQiOjU3ODg2LCJncmFudWxhcl9wZXJtaXNzaW9uIjpudWxsfX0.BaQ5HU5zUol93gLYY40uEDY_xH_4YwjKCUZ6s8CwJzXWdSWDXlT9HswOSlNvwvzMSc3Cd5Y0t9rgRntt_kC4Lg",
+      "refresh_token": "3bb138c5dd0f497a8513113101136a0a1b9558288533f1c5593c434a26880908",
+      "token_type": "Bearer",
+      "scope": "me tournaments:read tournaments:write matches:read matches:write participants:read participants:write",
+      "expires_at": "2026-06-16T04:57:31.931Z",
+      "updated_at": "2026-06-09T04:57:31.931Z"
     }
   ],
   "oauth_states": [
@@ -27,6 +65,46 @@
       "state": "c492c61325aa74d45b6d14653bf5d8b7e0e616361dc52b0c",
       "user_id": 1780745810257,
       "created_at": "2026-06-06T11:36:54.988Z"
+    },
+    {
+      "state": "08f322e1497c614cdda48765551d339ea0860ce87351c7ca",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:47:27.510Z"
+    },
+    {
+      "state": "f6a4f1d114def57df9e855fd421d6105e0af9e2cb09fcfeb",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:48:36.340Z"
+    },
+    {
+      "state": "ddde43c7b7f9e4582945842044a6165e4ddb369b55f1252b",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:48:56.550Z"
+    },
+    {
+      "state": "8c8f1a6179e85fd660793907882d07498b9ca634b95ebdae",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:50:21.930Z"
+    },
+    {
+      "state": "a141c254af6b8ee296b86b299bd1527e1c6404ddee75fe89",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:50:45.950Z"
+    },
+    {
+      "state": "ed8eb8c0c58f33f42e7a90eb22c28c3145e6aa51c8628685",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:52:36.139Z"
+    },
+    {
+      "state": "e41d39685243de0e5c2a999abeb511ac95730173818c8242",
+      "user_id": 1780745810257,
+      "created_at": "2026-06-07T04:54:31.801Z"
+    },
+    {
+      "state": "2e0826e91e397ac28739c6b6db3185b52b4330c8ed15c6ee",
+      "user_id": 1780813317154,
+      "created_at": "2026-06-07T06:45:47.054Z"
     }
   ]
 }

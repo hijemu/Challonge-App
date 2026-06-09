@@ -1,7 +1,7 @@
 const path = require('path');
 
 const PORT = process.env.PORT || 6666;
-const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-now';
+const JWT_SECRET = process.env.JWT_SECRET || 'umvwemvweewnvadsjkaosas';
 const APP_URL = process.env.APP_URL || 'https://api-test-cmxie.duckdns.org';
 const API_URL = process.env.API_URL || 'https://api-test-cmxie.duckdns.org';
 const DB_PATH = path.join(__dirname, '..', 'data', 'db.json');
