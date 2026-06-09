@@ -5,6 +5,7 @@ type Props = {
   participants?: any[];
   player1Name?: string;
   player2Name?: string;
+  matchNumber?: number;
   onClick?: () => void;
   onScore?: (match: any) => void;
 };
@@ -38,6 +39,7 @@ const MatchCard: React.FC<Props> = ({
   participants = [],
   player1Name,
   player2Name,
+  matchNumber,
   onClick,
   onScore,
 }) => {
@@ -70,7 +72,7 @@ const MatchCard: React.FC<Props> = ({
     >
       <div style={{ gridColumn: '1 / -1' }}>
         <div className="bbx-match-head">
-          <span className="bbx-chip">Battle {m.identifier || m.round || m.id || ''}</span>
+          <span className="bbx-chip">Match {matchNumber || m.identifier || m.id}</span>
           <span className="bbx-chip">
             <i className="bbx-live-dot" /> {String(state).replaceAll('_', ' ')}
           </span>

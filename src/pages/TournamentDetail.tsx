@@ -28,6 +28,11 @@ import {
   startTournament,
   updateTournamentTieBreaks,
 } from "../api/challonge";
+import {
+  createEmptyBbxStats,
+  exportBbxStatsToExcel,
+  saveBbxPlayerMatchStats,
+} from "../utils/bbxStats";
 
 const tieBreakOptions = [
   { value: "wins vs tied participants", label: "Wins vs Tied" },
@@ -149,6 +154,7 @@ const TournamentDetail: React.FC = () => {
   const swissOptions = attrs.swiss_options || {};
   const tieBreaks = Array.isArray(attrs.tie_breaks) ? attrs.tie_breaks : [];
   const ranking = roundRobinOptions.ranking || swissOptions.ranking;
+  const [bbxStats, setBbxStats] = useState(createEmptyBbxStats());
 
   console.log("TOURNAMENT", tournament);
   console.log("ATTRS", attrs);
@@ -287,6 +293,20 @@ const TournamentDetail: React.FC = () => {
     }
   };
 
+  const handleFinalizeGroupStage = async () => {
+    try {
+      await api.post(`/tournaments/${id}/finalize-group-stage`);
+
+      await load();
+
+      setMessage("Group stage finalized.");
+    } catch (err: any) {
+      setMessage(
+        err.response?.data?.error || "Could not finalize group stage."
+      );
+    }
+  };
+
   const getPlayerName = (match: any, side: "player1" | "player2") => {
     const embedded = getMatchEmbeddedName(match, side);
     if (embedded) return embedded;
@@ -317,13 +337,53 @@ const TournamentDetail: React.FC = () => {
     setP1Score(a);
     setP2Score(b);
     setActiveScorer("p1");
+    setBbxStats(createEmptyBbxStats());
   };
 
-  const addPoints = (points: number) => {
+  const addBbxPoints = (
+    type: "xtreme" | "over" | "burst" | "spin" | "warning",
+    points: number
+  ) => {
+    const side = activeScorer === "p1" ? "p1" : "p2";
+
+    setBbxStats((prev) => ({
+      ...prev,
+      [side]: {
+        ...prev[side],
+        [type]: prev[side][type] + 1,
+        total: prev[side].total + points,
+      },
+    }));
+
     if (activeScorer === "p1") {
       setP1Score((v) => v + points);
     } else {
       setP2Score((v) => v + points);
+    }
+  };
+
+  const applyDq = () => {
+    const side = activeScorer === "p1" ? "p1" : "p2";
+
+    setBbxStats((prev) => ({
+      ...prev,
+      [side]: {
+        ...prev[side],
+        dq: prev[side].dq + 1,
+        total: side === "p1" ? 4 : 0,
+      },
+      [side === "p1" ? "p2" : "p1"]: {
+        ...prev[side === "p1" ? "p2" : "p1"],
+        total: side === "p1" ? 0 : 4,
+      },
+    }));
+
+    if (side === "p1") {
+      setP1Score(4);
+      setP2Score(0);
+    } else {
+      setP1Score(0);
+      setP2Score(4);
     }
   };
 
@@ -357,6 +417,25 @@ const TournamentDetail: React.FC = () => {
         p2_score: p2Score,
       });
 
+      saveBbxPlayerMatchStats(id, [
+        {
+          playerId: player1Id,
+          playerName: getPlayerName(selectedMatch, "player1"),
+          stats: {
+            ...bbxStats.p1,
+            total: p1Score,
+          },
+        },
+        {
+          playerId: player2Id,
+          playerName: getPlayerName(selectedMatch, "player2"),
+          stats: {
+            ...bbxStats.p2,
+            total: p2Score,
+          },
+        },
+      ]);
+
       setSelectedMatch(null);
       await load();
     } catch (err: any) {
@@ -375,26 +454,75 @@ const TournamentDetail: React.FC = () => {
     const q = matchSearch.trim().toLowerCase();
     if (!q) return matches;
 
+    const terms = q
+      .split(/\s+/)
+      .map((term) => term.trim())
+      .filter(Boolean);
+
     return matches.filter((match) => {
       const m = unwrapMatch(match);
+
       const p1 = getPlayerName(match, "player1").toLowerCase();
       const p2 = getPlayerName(match, "player2").toLowerCase();
 
-      return (
-        p1.includes(q) ||
-        p2.includes(q) ||
-        String(m.identifier || "")
-          .toLowerCase()
-          .includes(q) ||
-        String(m.round || "")
-          .toLowerCase()
-          .includes(q) ||
-        String(m.state || "")
-          .toLowerCase()
-          .includes(q)
-      );
+      const searchable = [
+        p1,
+        p2,
+        `${p1} ${p2}`,
+        `${p2} ${p1}`,
+        String(m.identifier || "").toLowerCase(),
+        String(m.round || "").toLowerCase(),
+        String(m.state || "").toLowerCase(),
+        String(m.scores_csv || m.scores || m.score || "").toLowerCase(),
+      ].join(" ");
+
+      return terms.every((term) => searchable.includes(term));
     });
   }, [matches, matchSearch, participantMap]);
+
+  const stageGroups = useMemo(() => {
+    const groupStage: any[] = [];
+    const finalStage: any[] = [];
+
+    let foundFinalStage = false;
+
+    filteredMatches.forEach((match) => {
+      const m = unwrapMatch(match);
+
+      if (
+        !foundFinalStage &&
+        (m.state === "open" || m.state === "pending") &&
+        Number(m.suggested_play_order || 0) <= 3
+      ) {
+        foundFinalStage = true;
+      }
+
+      if (foundFinalStage) {
+        finalStage.push(match);
+      } else {
+        groupStage.push(match);
+      }
+    });
+
+    const groupByRound = (items: any[]) => {
+      const groups: Record<number, any[]> = {};
+
+      items.forEach((match) => {
+        const m = unwrapMatch(match);
+        const round = Number(m.round || 1);
+
+        if (!groups[round]) groups[round] = [];
+        groups[round].push(match);
+      });
+
+      return Object.entries(groups).sort((a, b) => Number(a[0]) - Number(b[0]));
+    };
+
+    return {
+      groupStage: groupByRound(groupStage),
+      finalStage: groupByRound(finalStage),
+    };
+  }, [filteredMatches]);
 
   const filteredPlayers = useMemo(() => {
     const q = playerSearch.trim().toLowerCase();
@@ -458,8 +586,9 @@ const TournamentDetail: React.FC = () => {
           )}
 
           <section
-          className="bbx-card-buttons"
-          style={{ padding: 5, marginBottom: 18 }}>
+            className="bbx-card-buttons"
+            style={{ padding: 5, marginBottom: 18 }}
+          >
             <div className="bbx-action-row">
               <button className="bbx-button ghost" onClick={shuffleSeeds}>
                 🔀 Shuffle Seeds
@@ -467,6 +596,20 @@ const TournamentDetail: React.FC = () => {
 
               <button className="bbx-button primary" onClick={startBracket}>
                 ▶ Start Tournament
+              </button>
+
+              <button
+                className="bbx-button ghost"
+                onClick={handleFinalizeGroupStage}
+              >
+                🏁 End Group Stage
+              </button>
+
+              <button
+                className="bbx-button ghost"
+                onClick={() => exportBbxStatsToExcel(id, title)}
+              >
+                📊 Export Stats
               </button>
             </div>
           </section>
@@ -529,17 +672,79 @@ const TournamentDetail: React.FC = () => {
           )}
 
           <div className="bbx-card-list">
-            {tab === "matches" &&
-              filteredMatches.map((match, index) => (
-                <MatchCard
-                  key={match?.match?.id || match?.id || index}
-                  match={match}
-                  participants={participants}
-                  player1Name={getPlayerName(match, "player1")}
-                  player2Name={getPlayerName(match, "player2")}
-                  onClick={() => openScoreModal(match)}
-                />
-              ))}
+            {tab === "matches" && (
+              <>
+                {!!stageGroups.groupStage.length && (
+                  <>
+                    <p className="bbx-stage-label">Group Stage</p>
+
+                    <div className="bbx-rounds-scroll">
+                      {stageGroups.groupStage.map(([round, roundMatches]) => (
+                        <div
+                          className="bbx-round-column"
+                          key={`group-${round}`}
+                        >
+                          <div className="bbx-round-header">Round {round}</div>
+
+                          {(roundMatches as any[]).map(
+                            (match: any, index: number) => (
+                              <MatchCard
+                                key={
+                                  match?.match?.id ||
+                                  match?.id ||
+                                  `group-${round}-${index}`
+                                }
+                                match={match}
+                                participants={participants}
+                                matchNumber={index + 1}
+                                player1Name={getPlayerName(match, "player1")}
+                                player2Name={getPlayerName(match, "player2")}
+                                onClick={() => openScoreModal(match)}
+                              />
+                            )
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {!!stageGroups.finalStage.length && (
+                  <>
+                    <p className="bbx-stage-label">Final Stage</p>
+
+                    <div className="bbx-rounds-scroll">
+                      {stageGroups.finalStage.map(([round, roundMatches]) => (
+                        <div
+                          className="bbx-round-column"
+                          key={`final-${round}`}
+                        >
+                          <div className="bbx-round-header">Round {round}</div>
+
+                          {(roundMatches as any[]).map(
+                            (match: any, index: number) => (
+                              <MatchCard
+                                key={
+                                  match?.match?.id ||
+                                  match?.id ||
+                                  `final-${round}-${index}`
+                                }
+                                match={match}
+                                participants={participants}
+                                matchNumber={index + 1}
+                                player1Name={getPlayerName(match, "player1")}
+                                player2Name={getPlayerName(match, "player2")}
+                                onClick={() => openScoreModal(match)}
+                              />
+                            )
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
 
             {tab === "players" &&
               filteredPlayers.map((item: any, index: number) => {
@@ -592,9 +797,9 @@ const TournamentDetail: React.FC = () => {
                         <span className="bbx-chip">
                           Diff: {standingDiff(data)}
                         </span>
-                        <span className="bbx-chip">
+                        {/* <span className="bbx-chip">
                           Pts Against: {data?.pointsAgainst ?? 0}
-                        </span>
+                        </span> */}
                         <span className="bbx-chip">
                           Pts Scored: {data?.pointsScored ?? 0}
                         </span>
@@ -677,7 +882,7 @@ const TournamentDetail: React.FC = () => {
         >
           <IonContent className="ion-padding">
             <main className="bbx-page" style={{ maxWidth: 560 }}>
-              <h1 className="bbx-title" style={{ fontSize: 30 }}>
+              <h1 className="bbx-title" style={{ padding: 20, fontSize: 25 }}>
                 Edit Score
               </h1>
 
@@ -729,22 +934,22 @@ const TournamentDetail: React.FC = () => {
                         gap: 10,
                       }}
                     >
-                      <IonButton onClick={() => addPoints(3)}>
+                      <IonButton onClick={() => addBbxPoints("xtreme", 3)}>
                         Xtreme +3
                       </IonButton>
-                      <IonButton onClick={() => addPoints(2)}>
+                      <IonButton onClick={() => addBbxPoints("over", 2)}>
                         Over +2
                       </IonButton>
-                      <IonButton onClick={() => addPoints(2)}>
+                      <IonButton onClick={() => addBbxPoints("burst", 2)}>
                         Burst +2
                       </IonButton>
-                      <IonButton onClick={() => addPoints(1)}>
+                      <IonButton onClick={() => addBbxPoints("spin", 1)}>
                         Spin +1
                       </IonButton>
-                      <IonButton onClick={() => addPoints(1)}>
+                      <IonButton onClick={() => addBbxPoints("warning", 1)}>
                         Warning +1
                       </IonButton>
-                      <IonButton onClick={() => addPoints(4)}>DQ 4-0</IonButton>
+                      <IonButton onClick={applyDq}>DQ 4-0</IonButton>
                     </div>
                   </div>
 
