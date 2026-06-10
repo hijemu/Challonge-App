@@ -19,6 +19,7 @@ import api, {
   addParticipantsBulk,
   shuffleParticipants,
   startTournament,
+  enableJudgeAccess,
 } from "../api/challonge";
 import MatchCard from "../components/MatchCard";
 import "../theme/bbx.css";
@@ -244,7 +245,9 @@ const TournamentDetail: React.FC = () => {
       setMessage("Participants shuffled.");
       await load();
     } catch (err: any) {
-      setMessage(err.response?.data?.error || "Could not shuffle participants.");
+      setMessage(
+        err.response?.data?.error || "Could not shuffle participants."
+      );
     }
   };
 
@@ -264,7 +267,19 @@ const TournamentDetail: React.FC = () => {
       await load();
       setMessage("Group stage finalized.");
     } catch (err: any) {
-      setMessage(err.response?.data?.error || "Could not finalize group stage.");
+      setMessage(
+        err.response?.data?.error || "Could not finalize group stage."
+      );
+    }
+  };
+
+  const handleEnableJudgeAccess = async () => {
+    try {
+      await enableJudgeAccess(id);
+
+      setMessage(`Judge access enabled. Share Tournament ID: ${id}`);
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || "Could not enable judge access.");
     }
   };
 
@@ -610,6 +625,13 @@ const TournamentDetail: React.FC = () => {
             style={{ padding: 5, marginBottom: 18 }}
           >
             <div className="bbx-action-row">
+              <button
+                className="bbx-button ghost"
+                onClick={handleEnableJudgeAccess}
+              >
+                🧑‍⚖️ Enable Judges
+              </button>
+
               <button className="bbx-button ghost" onClick={shuffleSeeds}>
                 🔀 Shuffle Seeds
               </button>

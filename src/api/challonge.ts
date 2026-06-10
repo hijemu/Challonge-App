@@ -55,3 +55,16 @@ export const updateTournamentTieBreaks = (
     tie_breaks: string[];
   }
 ) => api.put(`/tournaments/${id}/tiebreaks`, payload);
+export const enableJudgeAccess = (tournamentId: string) =>
+  api.post("/rooms/enable", {
+    tournament: tournamentId,
+  });
+
+export const getJudgeMatches = (tournamentId: string) =>
+  api.get(`/rooms/${tournamentId}/matches`);
+
+export const submitJudgeScore = (
+  tournamentId: string,
+  matchId: string,
+  payload: any
+) => api.put(`/rooms/${tournamentId}/matches/${matchId}`, payload);

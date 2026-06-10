@@ -10,6 +10,7 @@ import { AuthProvider } from "./context/AuthContext";
 import CreateTournament from "./pages/CreateTournament";
 import OfflineTournaments from "./pages/OfflineTournaments";
 import OfflineTournamentDetail from "./pages/OfflineTournamentDetail";
+import JudgeRoom from "./pages/JudgeRoom";
 
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/normalize.css";
@@ -47,6 +48,7 @@ const App: React.FC = () => {
             </Route>
             <Route exact path="/offline" component={OfflineTournaments} />
             <Route exact path="/offline/:id" component={OfflineTournamentDetail} />
+            <Route exact path="/judge" component={JudgeRoom} />
           </IonRouterOutlet>
         </IonReactRouter>
       </AuthProvider>

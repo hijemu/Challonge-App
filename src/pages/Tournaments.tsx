@@ -135,13 +135,16 @@ const Tournaments: React.FC = () => {
 
           <div className="bbx-action-row">
             <button
-              className="bbx-button primary"
+              className="bbx-button ghost"
               onClick={() => history.push("/connect-challonge")}
             >
               Challonge
             </button>
             <button className="bbx-button ghost" onClick={doLogout}>
               Logout
+            </button>
+            <button className="bbx-button ghost" onClick={() => history.push("/create-tournament")}>
+              Create
             </button>
           </div>
 
@@ -202,16 +205,22 @@ const Tournaments: React.FC = () => {
             Dashboard
           </button>
 
-          <button onClick={() => history.push("/create-tournament")}>
-            ➕<br />
-            Create
+          <button
+            className="bbx-button ghost"
+            onClick={() => history.push("/judge")}
+          >
+            🧑‍⚖️
+            <br />
+            Judge
           </button>
 
           <button
             className="bbx-button ghost"
             onClick={() => history.push("/offline")}
           >
-            📱 Offline Mode
+            📱
+            <br />
+            Offline Mode
           </button>
         </nav>
       </IonContent>
