@@ -1,31 +1,31 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --ion-background-color: #f5f6fa;
-  --ion-text-color: #151824;
+  --ion-background-color: #0d0f16;
+  --ion-text-color: #f8fafc;
   --ion-font-family: Inter, ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --bbx-bg: #f5f6fa;
-  --bbx-surface: #ffffff;
-  --bbx-card: rgba(255, 255, 255, 0.96);
+  --bbx-bg: #0d0f16;
+  --bbx-surface: #171a24;
+  --bbx-card: rgba(23, 26, 36, 0.96);
 
-  --bbx-ink: #151824;
-  --bbx-muted: #73798a;
-  --bbx-soft: #eef0f6;
-  --bbx-line: rgba(21, 24, 36, 0.09);
+  --bbx-ink: #f8fafc;
+  --bbx-muted: #a6b0c3;
+  --bbx-soft: #1c2230;
+  --bbx-line: rgba(255, 255, 255, 0.08);
 
-  --bbx-primary: #4f46e5;
-  --bbx-primary-2: #2563eb;
-  --bbx-accent: #06b6d4;
+  --bbx-primary: #8b5cf6;
+  --bbx-primary-2: #ff4fd8;
+  --bbx-accent: #ff4fd8;
 
-  --bbx-good: #16a34a;
+  --bbx-good: #22c55e;
   --bbx-warn: #f59e0b;
-  --bbx-danger: #dc2626;
+  --bbx-danger: #ef4444;
 
-  --bbx-shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.06);
-  --bbx-shadow-md: 0 12px 30px rgba(15, 23, 42, 0.09);
-  --bbx-shadow-lg: 0 22px 55px rgba(15, 23, 42, 0.12);
+  --bbx-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.26);
+  --bbx-shadow-md: 0 12px 30px rgba(0, 0, 0, 0.34);
+  --bbx-shadow-lg: 0 22px 55px rgba(0, 0, 0, 0.45);
 
   --bbx-radius-xl: 22px;
   --bbx-radius-lg: 18px;
@@ -49,7 +49,7 @@ ion-content::part(background) {
   background:
     radial-gradient(circle at top left, rgba(79, 70, 229, 0.11), transparent 23rem),
     radial-gradient(circle at top right, rgba(6, 182, 212, 0.12), transparent 22rem),
-    linear-gradient(180deg, #fbfcff 0%, #f2f4f8 100%) !important;
+    linear-gradient(180deg, #0d0f16 0%, #121622 45%, #171a24 100%) !important;
 }
 
 .bbx-page {
@@ -348,7 +348,7 @@ ion-content::part(background) {
 .bbx-status-card {
   border-radius: var(--bbx-radius-xl);
   padding: 20px;
-  background: linear-gradient(135deg, #ffffff, #eff6ff);
+  background: linear-gradient(135deg, #171a24, #eff6ff);
   box-shadow: var(--bbx-shadow-md);
   border: 1px solid rgba(79, 70, 229, 0.11);
 }
@@ -458,7 +458,7 @@ ion-content::part(background) {
   border: 1px solid rgba(21, 24, 36, 0.05);
   border-radius: var(--bbx-radius-md);
   padding: 13px 10px;
-  background: #f5f6fb;
+  background: #1c2230;
   font-weight: 900;
   text-align: center;
   min-height: 50px;
@@ -514,7 +514,7 @@ ion-content::part(background) {
 .bbx-select-box {
   border-radius: var(--bbx-radius-md);
   padding: 9px 12px;
-  background: #f5f6fb;
+  background: #1c2230;
   border: 1px solid rgba(21, 24, 36, 0.055);
 }
 
@@ -614,4 +614,80 @@ ion-content::part(background) {
     width: 492px;
     transform: translateX(-50%);
   }
+}
+
+/* DARK MODE OVERRIDES */
+
+.bbx-hero,
+.bbx-status-card,
+.bbx-soft-card,
+.bbx-settings-card,
+.bbx-tournament-card {
+  background: #171a24 !important;
+  border-color: #293143 !important;
+}
+
+.bbx-stat {
+  background: #1c2230 !important;
+  border-color: #293143 !important;
+}
+
+.bbx-chip {
+  background: #242b3d !important;
+  color: #cbd5e1 !important;
+  border-color: #364152 !important;
+}
+
+.bbx-tabbar {
+  background: rgba(23, 26, 36, 0.95) !important;
+  border-color: #293143 !important;
+}
+
+.bbx-player-pill {
+  background: #1c2230 !important;
+  color: #f8fafc !important;
+  border-color: #293143 !important;
+}
+
+.bbx-player-pill.active {
+  background: linear-gradient(
+    135deg,
+    #8b5cf6,
+    #ff4fd8
+  ) !important;
+  color: white !important;
+}
+
+.bbx-back-button,
+.bbx-input,
+.bbx-search {
+  background: #171a24 !important;
+  color: #f8fafc !important;
+  border-color: #293143 !important;
+}
+
+.bbx-title,
+.bbx-tournament-name,
+.bbx-section-title h2,
+.bbx-score {
+  color: #f8fafc !important;
+}
+
+.bbx-subtitle,
+.bbx-section-title span,
+.bbx-stat span {
+  color: #94a3b8 !important;
+}
+
+.bbx-button.ghost {
+  background: rgba(139, 92, 246, 0.12) !important;
+  color: #c4b5fd !important;
+}
+
+.bbx-button.primary {
+  background: linear-gradient(
+    135deg,
+    #8b5cf6,
+    #ff4fd8
+  ) !important;
 }

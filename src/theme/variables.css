@@ -1,33 +1,41 @@
 :root,
 :root.md,
 :root.ios {
-  color-scheme: light !important;
+  color-scheme: dark !important;
 
-  --ion-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --ion-background-color: #f7f8ff;
-  --ion-background-color-rgb: 247, 248, 255;
-  --ion-text-color: #172033;
-  --ion-text-color-rgb: 23, 32, 51;
-  --ion-card-background: #ffffff;
-  --ion-item-background: #ffffff;
-  --ion-toolbar-background: rgba(255, 255, 255, 0.88);
-  --ion-tab-bar-background: #ffffff;
-  --ion-border-color: #e5e9f5;
+  --ion-font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --ion-color-primary: #6c63ff;
-  --ion-color-primary-rgb: 108, 99, 255;
+  --ion-background-color: #0d0f16;
+  --ion-background-color-rgb: 13, 15, 22;
+
+  --ion-text-color: #f8fafc;
+  --ion-text-color-rgb: 248, 250, 252;
+
+  --ion-card-background: #171a24;
+  --ion-item-background: #171a24;
+  --ion-toolbar-background: rgba(17, 20, 29, 0.92);
+  --ion-tab-bar-background: #151823;
+  --ion-border-color: #293143;
+
+  --ion-color-primary: #8b5cf6;
+  --ion-color-primary-rgb: 139, 92, 246;
   --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-shade: #5f57e0;
-  --ion-color-primary-tint: #7b73ff;
+  --ion-color-primary-shade: #7c3aed;
+  --ion-color-primary-tint: #a78bfa;
 
-  --ion-color-secondary: #16b8a6;
-  --ion-color-secondary-rgb: 22, 184, 166;
+  --ion-color-secondary: #ff4fd8;
+  --ion-color-secondary-rgb: 255, 79, 216;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade: #e044c0;
+  --ion-color-secondary-tint: #ff70df;
+
   --ion-color-tertiary: #ffb23f;
-  --ion-color-success: #10b981;
+  --ion-color-success: #22c55e;
   --ion-color-warning: #f59e0b;
   --ion-color-danger: #ef4444;
-  --ion-color-medium: #64748b;
-  --ion-color-light: #f2f5ff;
+  --ion-color-medium: #9ca3af;
+  --ion-color-light: #242938;
 }
 
 * {
@@ -38,19 +46,29 @@ html,
 body,
 ion-app,
 ion-router-outlet {
-  background: #f7f8ff !important;
+  background: #0d0f16 !important;
 }
 
 ion-content {
-  --background: linear-gradient(180deg, #eef2ff 0%, #f7f8ff 34%, #ffffff 100%) !important;
+  --background: radial-gradient(
+      circle at 10% 0%,
+      rgba(139, 92, 246, 0.2),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 90% 8%,
+      rgba(255, 79, 216, 0.16),
+      transparent 25rem
+    ),
+    linear-gradient(180deg, #0d0f16 0%, #121622 44%, #171a24 100%) !important;
 }
 
 ion-header,
 ion-toolbar {
-  --background: rgba(255, 255, 255, 0.88) !important;
-  --color: #172033 !important;
+  --background: rgba(17, 20, 29, 0.9) !important;
+  --color: #f8fafc !important;
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  border-bottom: 1px solid rgba(41, 49, 67, 0.95);
 }
 
 ion-title {
@@ -61,26 +79,32 @@ ion-title {
 ion-card {
   margin: 14px 0;
   border-radius: 28px !important;
-  background: #ffffff !important;
-  box-shadow: 0 18px 45px rgba(63, 76, 119, 0.11) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #171a24 !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.34) !important;
+  border: 1px solid rgba(55, 65, 81, 0.95);
   overflow: hidden;
 }
 
 ion-card-title {
-  color: #172033;
+  color: #f8fafc;
   font-weight: 900;
   letter-spacing: -0.035em;
 }
 
 ion-item {
-  --background: #ffffff !important;
-  --border-color: #edf0f8;
+  --background: #171a24 !important;
+  --color: #f8fafc;
+  --border-color: #293143;
   --border-radius: 20px;
   --padding-start: 16px;
   --inner-padding-end: 16px;
   margin: 10px 0;
   border-radius: 20px;
+  color: #f8fafc;
+}
+
+ion-label {
+  color: #cbd5e1 !important;
 }
 
 ion-list {
@@ -88,14 +112,17 @@ ion-list {
 }
 
 ion-input,
-ion-searchbar {
-  --color: #172033;
-  --placeholder-color: #94a3b8;
+ion-textarea,
+ion-searchbar,
+ion-select {
+  --color: #f8fafc;
+  --placeholder-color: #7c879c;
+  color: #f8fafc;
 }
 
 ion-searchbar {
-  --background: #ffffff !important;
-  --box-shadow: 0 12px 28px rgba(63, 76, 119, 0.08);
+  --background: #171a24 !important;
+  --box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26);
   --border-radius: 20px;
   padding-inline-start: 0 !important;
   padding-inline-end: 0 !important;
@@ -115,16 +142,16 @@ ion-chip {
 }
 
 ion-segment {
-  background: #e9edff;
+  background: #1c2230;
   border-radius: 20px;
   padding: 5px;
 }
 
 ion-segment-button {
   --border-radius: 16px;
-  --indicator-color: #ffffff;
-  --color: #667085;
-  --color-checked: #172033;
+  --indicator-color: #2b3345;
+  --color: #94a3b8;
+  --color-checked: #f8fafc;
   min-height: 44px;
   font-weight: 850;
   text-transform: none;
@@ -138,7 +165,7 @@ p {
 }
 
 p {
-  color: #64748b;
+  color: #a6b0c3;
   line-height: 1.55;
 }
 
@@ -149,8 +176,13 @@ p {
 }
 
 .hero-card {
-  background: linear-gradient(135deg, #ffffff 0%, #eef2ff 55%, #e0fbf7 100%) !important;
-  border: 1px solid rgba(199, 210, 254, 0.8);
+  background: radial-gradient(
+      circle at 92% 10%,
+      rgba(255, 79, 216, 0.2),
+      transparent 15rem
+    ),
+    linear-gradient(135deg, #171a24 0%, #1c2030 55%, #22162a 100%) !important;
+  border: 1px solid rgba(255, 79, 216, 0.18);
 }
 
 .hero-kicker {
@@ -159,8 +191,8 @@ p {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(108, 99, 255, 0.12);
-  color: #5b55d9;
+  background: rgba(255, 79, 216, 0.13);
+  color: #ff70df;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -169,7 +201,7 @@ p {
 
 .hero-title {
   margin: 14px 0 8px;
-  color: #172033;
+  color: #f8fafc;
   font-size: clamp(34px, 8vw, 58px);
   line-height: 0.92;
   font-weight: 1000;
@@ -180,10 +212,12 @@ p {
   max-width: 620px;
   margin-bottom: 0;
   font-size: 16px;
+  color: #a6b0c3;
 }
 
 .soft-card {
-  background: rgba(255, 255, 255, 0.92) !important;
+  background: rgba(23, 26, 36, 0.94) !important;
+  border: 1px solid rgba(55, 65, 81, 0.9);
 }
 
 .stat-grid {
@@ -195,18 +229,18 @@ p {
 .stat-pill {
   padding: 14px;
   border-radius: 22px;
-  background: #f5f7ff;
-  border: 1px solid #e7ebfb;
+  background: #1c2230;
+  border: 1px solid #293143;
 }
 
 .stat-value {
-  color: #172033;
+  color: #f8fafc;
   font-size: 22px;
   font-weight: 950;
 }
 
 .stat-label {
-  color: #64748b;
+  color: #94a3b8;
   font-size: 12px;
   font-weight: 800;
 }
@@ -215,8 +249,9 @@ p {
   text-align: center;
   padding: 34px 20px;
   border-radius: 28px;
-  background: #ffffff;
-  border: 1px dashed #cbd5e1;
+  background: #171a24;
+  border: 1px dashed #475569;
+  color: #94a3b8;
 }
 
 .match-score {
@@ -232,12 +267,12 @@ p {
   padding: 14px 16px;
   border-radius: 22px;
   text-align: center;
-  background: #f5f7ff;
-  border: 1px solid #e5e9f5;
+  background: #1c2230;
+  border: 1px solid #293143;
 }
 
 .score-number {
-  color: #172033;
+  color: #f8fafc;
   font-size: 34px;
   font-weight: 1000;
   line-height: 1;
@@ -245,7 +280,7 @@ p {
 
 .score-name {
   margin-top: 6px;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 12px;
   font-weight: 800;
 }
