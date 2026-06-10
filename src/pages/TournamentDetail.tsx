@@ -518,15 +518,13 @@ const TournamentDetail: React.FC = () => {
     const finalStage: any[] = [];
 
     let foundFinalStage = false;
+    let previousPlayOrder = 0;
 
-    filteredMatches.forEach((match) => {
+    filteredMatches.forEach((match, index) => {
       const m = unwrapMatch(match);
+      const playOrder = Number(m.suggested_play_order || index + 1);
 
-      if (
-        !foundFinalStage &&
-        (m.state === "open" || m.state === "pending") &&
-        Number(m.suggested_play_order || 0) <= 3
-      ) {
+      if (index > 0 && playOrder <= previousPlayOrder) {
         foundFinalStage = true;
       }
 
@@ -535,6 +533,8 @@ const TournamentDetail: React.FC = () => {
       } else {
         groupStage.push(match);
       }
+
+      previousPlayOrder = playOrder;
     });
 
     const groupByRound = (items: any[]) => {
