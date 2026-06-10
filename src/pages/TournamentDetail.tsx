@@ -428,8 +428,30 @@ const TournamentDetail: React.FC = () => {
   const saveScore = async () => {
     if (!selectedMatch) return;
 
-    const player1Id = getPlayerId(selectedMatch, "player1");
-    const player2Id = getPlayerId(selectedMatch, "player2");
+    const latestMatches = await getMatches(id);
+
+    const freshMatch = listFrom(latestMatches, "matches").find(
+      (m: any) => String(unwrapMatch(m).id) === String(selectedMatch.id)
+    );
+
+    if (!freshMatch) {
+      setMessage("This match was modified by another judge. Refreshing...");
+      await load();
+      closeScoreModal();
+      return;
+    }
+
+    const fresh = unwrapMatch(freshMatch);
+
+    if (fresh.state === "complete") {
+      setMessage("This match was already completed by another judge.");
+      await load();
+      closeScoreModal();
+      return;
+    }
+
+    const player1Id = getPlayerId(freshMatch, "player1");
+    const player2Id = getPlayerId(freshMatch, "player2");
 
     if (!player1Id || !player2Id) {
       setMessage("Cannot save yet: this match still has TBD player slots.");
